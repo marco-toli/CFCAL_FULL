@@ -24,67 +24,86 @@
 // ********************************************************************
 //
 //
-// $Id: ExN06PhysicsList.hh,v 1.8 2010-10-23 19:13:23 gum Exp $
+// $Id: DetectorConstruction.hh,v 1.5 2006-06-29 17:53:55 gunter Exp $
 // GEANT4 tag $Name: not supported by cvs2svn $
 //
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#ifndef ExN06PhysicsList_h
-#define ExN06PhysicsList_h 1
+#ifndef DetectorConstruction_h
+#define DetectorConstruction_h 1
+
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fstream>
+#include "ConfigFile.hh"
+#include "TString.h"
 
 #include "globals.hh"
-#include "G4VUserPhysicsList.hh"
+#include "G4VUserDetectorConstruction.hh"
+#include "G4Material.hh"
+#include "G4MaterialTable.hh"
+#include "G4Element.hh"
+#include "G4ElementTable.hh"
 
-class G4Cerenkov;
-class G4Scintillation;
-class G4OpAbsorption;
-class G4OpRayleigh;
-class G4OpMieHG;
-class G4OpBoundaryProcess;
 
-class ExN06PhysicsListMessenger;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class ExN06PhysicsList : public G4VUserPhysicsList
+class DetectorConstruction : public G4VUserDetectorConstruction
 {
-  public:
-    ExN06PhysicsList();
-   ~ExN06PhysicsList();
-
-  public:
-    void ConstructParticle();
-    void ConstructProcess();
-
-    void SetCuts();
-
-    //these methods Construct particles
-    void ConstructBosons();
-    void ConstructLeptons();
-    void ConstructMesons();
-    void ConstructBaryons();
-
-    //these methods Construct physics processes and register them
-    void ConstructGeneral();
-    void ConstructEM();
-    void ConstructOp();
-    
-    //for the Messenger 
-    void SetVerbose(G4int);
-    void SetNbOfPhotonsCerenkov(G4int);
-    
-  private:
-    G4Cerenkov*          theCerenkovProcess;
-    G4Scintillation*     theScintillationProcess;
-    G4OpAbsorption*      theAbsorptionProcess;
-    G4OpRayleigh*        theRayleighScatteringProcess;
-    G4OpMieHG*           theMieHGScatteringProcess;
-    G4OpBoundaryProcess* theBoundaryProcess;
-    
-    ExN06PhysicsListMessenger* pMessenger;   
+public:
+  DetectorConstruction();
+  DetectorConstruction(const string& configFileName);
+  ~DetectorConstruction();
+  
+public:
+  G4VPhysicalVolume* Construct();
+  
+private:
+  G4double expHall_x;
+  G4double expHall_y;
+  G4double expHall_z;
+  
+  G4int    crystal_material;
+  G4int    crystal_lightyield;
+  G4double crystal_risetime;
+  G4double crystal_abslength;
+  G4double crystal_induced_abslength;
+  
+  G4double fiber_lenght;
+  G4double fiber_radius;
+  int NFIBERS_X, NFIBERS_Y;
+  G4double spacingX, spacingY;
+  
+  G4double absorber_x;
+  G4double absorber_y;
+  G4double absorber_z;
+  G4double brass_hole_radius;
+  G4int abs_material;
+  
+  G4double win_r;
+  G4double win_l;
+  G4int    win_material;
+  
+  G4double det_d;
+  G4double det_distance;
+  G4int    det_material;
+  
+  G4double depth;
+  
+  void readConfigFile(string configFileName);
+  
+  //Materials
+  void initializeMaterials();
+  G4Material* AbMaterial;
+  G4Material* GaMaterial;
+  G4Material* ScMaterial;
+  G4Material* WiMaterial;
+  G4Material* DeMaterial;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif /* ExN06PhysicsList_h */
+#endif /*DetectorConstruction_h*/

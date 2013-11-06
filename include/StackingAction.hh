@@ -23,38 +23,35 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-//
-// $Id: ExN06RunAction.hh,v 1.9 2006-06-29 17:54:10 gunter Exp $
+// $Id: StackingAction.hh,v 1.5 2006-06-29 17:54:13 gunter Exp $
 // GEANT4 tag $Name: not supported by cvs2svn $
-// 
+//
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#ifndef ExN06RunAction_h
-#define ExN06RunAction_h 1
+#ifndef StackingAction_H
+#define StackingAction_H 1
 
 #include "globals.hh"
-#include "G4UserRunAction.hh"
+#include "G4UserStackingAction.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class G4Timer;
-class G4Run;
-
-class ExN06RunAction : public G4UserRunAction
+class StackingAction : public G4UserStackingAction
 {
-  public:
-    ExN06RunAction();
-   ~ExN06RunAction();
-
-  public:
-    void BeginOfRunAction(const G4Run* aRun);
-    void EndOfRunAction(const G4Run* aRun);
-
-  private:
-    G4Timer* timer;
+public:
+  StackingAction();
+  ~StackingAction();
+  
+public:
+  G4ClassificationOfNewTrack ClassifyNewTrack(const G4Track* aTrack);
+  void NewStage();
+  void PrepareNewEvent();
+  
+private:
+  G4int gammaCounter;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif /*ExN06RunAction_h*/
+#endif

@@ -24,63 +24,48 @@
 // ********************************************************************
 //
 //
-// $Id: ExN06DetectorConstruction.hh,v 1.5 2006-06-29 17:53:55 gunter Exp $
+// $Id: RunAction.cc,v 1.10 2006-06-29 17:54:31 gunter Exp $
 // GEANT4 tag $Name: not supported by cvs2svn $
-//
+// 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#ifndef ExN06DetectorConstruction_h
-#define ExN06DetectorConstruction_h 1
+// Make this appear first!
 
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <fstream>
-#include "ConfigFile.hh"
-#include "TString.h"
+#include "RunAction.hh"
 
-#include "globals.hh"
-#include "G4VUserDetectorConstruction.hh"
-#include "G4Material.hh"
-#include "G4MaterialTable.hh"
-#include "G4Element.hh"
-#include "G4ElementTable.hh"
+#include "G4Timer.hh"
+#include "G4Run.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class ExN06DetectorConstruction : public G4VUserDetectorConstruction
+RunAction::RunAction()
 {
-  public:
-    ExN06DetectorConstruction();
-    ExN06DetectorConstruction(string configFileName);
-   ~ExN06DetectorConstruction();
-
-  public:
-    G4VPhysicalVolume* Construct();
-
-  private:
-    G4double expHall_x;
-    G4double expHall_y;
-    G4double expHall_z;
-
-    G4double absorber_x;
-    G4double absorber_y;
-    G4double absorber_z;
-    
-	int NFIBERS_X, NFIBERS_Y;
-    G4double spacingX, spacingY;
-    
-    G4double fiber_lenght;
-    G4double fiber_radius;
-    G4double brass_hole_radius;
-    G4double startAngle;
-    G4double spanningAngle;
-      
-    void readConfigFile(string configFileName);
-		
-};
+  timer = new G4Timer;
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif /*ExN06DetectorConstruction_h*/
+RunAction::~RunAction()
+{
+  delete timer;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void RunAction::BeginOfRunAction(const G4Run* aRun)
+{
+  G4cout << "### Run :: " << aRun->GetRunID() << " started ..." << G4endl; 
+  timer->Start();
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void RunAction::EndOfRunAction(const G4Run* aRun)
+{   
+  timer->Stop();
+  G4cout << "number of event = " << aRun->GetNumberOfEvent() 
+         << " " << *timer << G4endl;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

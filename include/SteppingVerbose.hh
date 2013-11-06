@@ -24,74 +24,32 @@
 // ********************************************************************
 //
 //
-// $Id: ExN06PrimaryGeneratorAction.cc,v 1.6 2006-06-29 17:54:27 gunter Exp $
+// $Id: SteppingVerbose.hh,v 1.2 2006-06-29 17:54:15 gunter Exp $
 // GEANT4 tag $Name: not supported by cvs2svn $
+//
 //
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#include "ExN06PrimaryGeneratorAction.hh"
+class SteppingVerbose;
 
-#include "Randomize.hh"
+#ifndef SteppingVerbose_h
+#define SteppingVerbose_h 1
 
-#include "G4Event.hh"
-#include "G4ParticleGun.hh"
-#include "G4ParticleTable.hh"
-#include "G4ParticleDefinition.hh"
-#include "G4GeneralParticleSource.hh"
-#include "CreateTree.hh"
-
+#include "G4SteppingVerbose.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-ExN06PrimaryGeneratorAction::ExN06PrimaryGeneratorAction()
+class SteppingVerbose : public G4SteppingVerbose
 {
+public:   
+  SteppingVerbose();
+  ~SteppingVerbose();
   
-  G4int n_particle = 1;
-  particleGun = new G4ParticleGun(n_particle);
-/*
-  G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
-  G4String particleName;
-  particleGun->SetParticleDefinition(particleTable->FindParticle(particleName="neutron"));
-  particleGun->SetParticleEnergy(3.0*MeV);
-  particleGun->SetParticlePosition(G4ThreeVector(0,0,10.0*cm));
-  */
-  G4GeneralParticleSource *gps = new G4GeneralParticleSource();
- 
-//   gps->GetCurrentSource()->GetEneDist()->SetMonoEnergy(0.511*MeV);
-//   gps->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(0.0*cm, 1.2*cm, 0.0*cm));
-//   gps->GetCurrentSource()->SetParticlePosition(0.*mm,12.*mm,0.*mm);
-//   gps->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(0.,-1.,0.));
-  
-  gun = gps;
- 
-}
+  void StepInfo();
+  void TrackingStarted();
+};
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-ExN06PrimaryGeneratorAction::~ExN06PrimaryGeneratorAction()
-{
-  delete particleGun;
-  delete gunMessenger;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void ExN06PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
-{
-//   particleGun->GeneratePrimaryVertex(anEvent);
-    gun->GeneratePrimaryVertex(anEvent);
-    
-    /// store primary particle position
-    	G4ThreeVector InitPos = gun->GetParticlePosition();
-	
-	CreateTree::Instance()->InitialPositionX = InitPos[0];		
-	CreateTree::Instance()->InitialPositionY = InitPos[1];		
-	CreateTree::Instance()->InitialPositionZ = InitPos[2];	
-	
-	cout << " position x = " << InitPos[0] << endl;
-	
-// 	CreateTree::Instance()->Fill();
-
-}
-
+#endif

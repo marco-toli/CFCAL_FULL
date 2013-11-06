@@ -24,34 +24,37 @@
 // ********************************************************************
 //
 //
-// $Id: ExN06SteppingVerbose.hh,v 1.2 2006-06-29 17:54:15 gunter Exp $
+// $Id: RunAction.hh,v 1.9 2006-06-29 17:54:10 gunter Exp $
 // GEANT4 tag $Name: not supported by cvs2svn $
-//
-//
+// 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class ExN06SteppingVerbose;
+#ifndef RunAction_h
+#define RunAction_h 1
 
-#ifndef ExN06SteppingVerbose_h
-#define ExN06SteppingVerbose_h 1
-
-#include "G4SteppingVerbose.hh"
+#include "globals.hh"
+#include "G4UserRunAction.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class ExN06SteppingVerbose : public G4SteppingVerbose
+class G4Timer;
+class G4Run;
+
+class RunAction : public G4UserRunAction
 {
- public:   
+  public:
+    RunAction();
+   ~RunAction();
 
-   ExN06SteppingVerbose();
-  ~ExN06SteppingVerbose();
+  public:
+    void BeginOfRunAction(const G4Run* aRun);
+    void EndOfRunAction(const G4Run* aRun);
 
-   void StepInfo();
-   void TrackingStarted();
-
+  private:
+    G4Timer* timer;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif
+#endif /*RunAction_h*/

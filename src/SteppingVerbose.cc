@@ -24,35 +24,35 @@
 // ********************************************************************
 //
 //
-// $Id: ExN06SteppingVerbose.cc,v 1.4 2006-06-29 17:54:37 gunter Exp $
+// $Id: SteppingVerbose.cc,v 1.4 2006-06-29 17:54:37 gunter Exp $
 // GEANT4 tag $Name: not supported by cvs2svn $
 //
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#include "ExN06SteppingVerbose.hh"
+#include "SteppingVerbose.hh"
 
 #include "G4SteppingManager.hh"
 #include "G4UnitsTable.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-ExN06SteppingVerbose::ExN06SteppingVerbose()
+SteppingVerbose::SteppingVerbose()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-ExN06SteppingVerbose::~ExN06SteppingVerbose()
+SteppingVerbose::~SteppingVerbose()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void ExN06SteppingVerbose::StepInfo()
+void SteppingVerbose::StepInfo()
 {
   CopyState();
   
   G4int prec = G4cout.precision(3);
-
+  
   if( verboseLevel >= 1 ){
     if( verboseLevel >= 4 ) VerboseTrack();
     if( verboseLevel >= 3 ){
@@ -141,7 +141,7 @@ void ExN06SteppingVerbose::StepInfo()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void ExN06SteppingVerbose::TrackingStarted()
+void SteppingVerbose::TrackingStarted()
 {
 
   CopyState();

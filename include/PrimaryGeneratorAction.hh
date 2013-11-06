@@ -24,61 +24,42 @@
 // ********************************************************************
 //
 //
-// $Id: ExN06PrimaryGeneratorAction.cc,v 1.6 2006-06-29 17:54:27 gunter Exp $
+// $Id: PrimaryGeneratorAction.hh,v 1.6 2006-06-29 17:54:04 gunter Exp $
 // GEANT4 tag $Name: not supported by cvs2svn $
 //
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#include "ExN06PrimaryGeneratorAction.hh"
+#ifndef PrimaryGeneratorAction_h
+#define PrimaryGeneratorAction_h 1
 
-#include "Randomize.hh"
-
-#include "G4Event.hh"
-#include "G4ParticleGun.hh"
-#include "G4ParticleTable.hh"
-#include "G4ParticleDefinition.hh"
+#include "G4VUserPrimaryGeneratorAction.hh"
 #include "G4GeneralParticleSource.hh"
-#include "CreateTree.hh"
+
+#include "globals.hh"
+
+class G4ParticleGun;
+class G4Event;
+class G4GeneralParticleSource;
+
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-ExN06PrimaryGeneratorAction::ExN06PrimaryGeneratorAction()
+class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
+public:
+  PrimaryGeneratorAction();
+  ~PrimaryGeneratorAction();
   
-  G4int n_particle = 1;
-  particleGun = new G4ParticleGun(n_particle);
-/*
-  G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
-  G4String particleName;
-  particleGun->SetParticleDefinition(particleTable->FindParticle(particleName="neutron"));
-  particleGun->SetParticleEnergy(3.0*MeV);
-  particleGun->SetParticlePosition(G4ThreeVector(0,0,10.0*cm));
-  */
-  G4GeneralParticleSource *gps = new G4GeneralParticleSource();
- 
-//   gps->GetCurrentSource()->GetEneDist()->SetMonoEnergy(0.511*MeV);
-//   gps->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(0.0*cm, 1.2*cm, 0.0*cm));
-//   gps->GetCurrentSource()->SetParticlePosition(0.*mm,12.*mm,0.*mm);
-//   gps->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(0.,-1.,0.));
+public:
+  void GeneratePrimaries(G4Event*);
   
-  gun = gps;
- 
-}
+private:
+  G4ParticleGun* particleGun;
+  G4GeneralParticleSource* gun;
+};
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-ExN06PrimaryGeneratorAction::~ExN06PrimaryGeneratorAction()
-{
-  delete particleGun;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void ExN06PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
-{
-  //particleGun->GeneratePrimaryVertex(anEvent);
-  gun->GeneratePrimaryVertex(anEvent);
-}
-
+#endif /*PrimaryGeneratorAction_h*/
