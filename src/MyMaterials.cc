@@ -319,6 +319,46 @@ G4Material* MyMaterials::OpticalGrease()
   return mat;
 }
 
+G4Material* MyMaterials::DSBCe()  // Nanostructured glass ceramics scintillator DSB:Ce
+{
+  G4double a, z, density;
+  G4Element*  DSB_glass = new G4Element("DSB_glass",    "DSB",   z=51,  a=124.00*g/mole);
+
+  G4Material* mat = new G4Material("DSB", density=4*g/cm3,1);
+  mat->AddElement(DSB_glass,1);
+
+  // large band between 470 (2.64 eV) and 630 nm (1.97 eV) (mean 535 nm, 2.32)
+  const G4int NUMENTRIES_1 = 5;
+  G4double FAST_Energy[NUMENTRIES_1]    = {1.8*eV,1.90*eV,2.7*eV,2.88*eV,4.08*eV};
+  G4double FAST_COMPONENT[NUMENTRIES_1] = {0.00,1.00,2.0,1.0,0.00};
+
+
+  const G4int NUMENTRIES_2 = 3;
+  G4double RIND_Energy[NUMENTRIES_2]    = { 1.0*eV, 1.84*eV, 4.08*eV };
+  G4double RIND_INDEX[NUMENTRIES_2]     = { 1.5, 1.5, 1.5 };
+  G4double ABS_Energy[NUMENTRIES_2]     = { 1.0*eV, 1.84*eV, 4.08*eV };
+  //G4double ABS_LENGTH[NUMENTRIES_2]     = { 50.*m, 50.*m, 50.*m};
+  G4double ABS_LENGTH[NUMENTRIES_2]       = { 500.*mm, 500.*mm, 500.*mm };	//138 original
+//   G4double Rayleigh[NUMENTRIES_2]       = { 138.*mm, 138.*mm, 138.*mm};
+
+  G4MaterialPropertiesTable* mt = new G4MaterialPropertiesTable();
+  mt->AddProperty("FASTCOMPONENT", FAST_Energy, FAST_COMPONENT, NUMENTRIES_1);
+  mt->AddProperty("RINDEX",        RIND_Energy, RIND_INDEX,     NUMENTRIES_2);
+  mt->AddProperty("ABSLENGTH",     ABS_Energy,  ABS_LENGTH,     NUMENTRIES_2);
+//   mt->AddProperty("RAYLEIGH",      ABS_Energy,  Rayleigh,     NUMENTRIES_2);
+
+  mt->AddConstProperty("SCINTILLATIONYIELD",1800/MeV);
+  mt->AddConstProperty("RESOLUTIONSCALE",8.5);
+  mt->AddConstProperty("FASTTIMECONSTANT",50.*ns);
+  mt->AddConstProperty("YIELDRATIO",1.0);
+  mt->AddConstProperty("FASTSCINTILLATIONRISETIME",0.5*ns);
+
+  mat->SetMaterialPropertiesTable(mt);
+
+
+  return mat;
+}
+
 
 
 G4Material* MyMaterials::LuAG_Ce() // Lutetium Aluminum Garnet - Ce-doped
