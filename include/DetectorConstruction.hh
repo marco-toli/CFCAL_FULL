@@ -72,7 +72,7 @@ private:
   G4double crystal_abslength;
   G4double crystal_induced_abslength;
   
-  G4double fiber_lenght;
+  G4double fiber_length;
   G4double fiber_radius;
   int NFIBERS_X, NFIBERS_Y;
   G4double spacingX, spacingY;

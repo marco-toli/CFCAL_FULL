@@ -27,6 +27,7 @@ public:
   static G4Material* LuAG_Ce();
   static G4Material* LuAG_Pr();
   static G4Material* PWO();
+  static G4Material* DSBCe();
   
   static G4double fromNmToEv(G4double wavelength);
   static G4double fromEvToNm(G4double energy);
