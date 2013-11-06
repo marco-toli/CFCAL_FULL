@@ -3,7 +3,7 @@
 
 #
 #
-/gps/energy 1 GeV
+/gps/energy 10 eV
 /gps/particle e-
 #/gps/particle gamma
 
@@ -32,4 +32,4 @@
 #/gps/pos/radius 2.2 cm
 
 
-/run/beamOn 2
+/run/beamOn 10

@@ -12,7 +12,7 @@
 #include "G4SDManager.hh"
 #include "MyMaterials.hh"
 #include "CreateTree.hh"
-#include "ExN06PrimaryGeneratorAction.hh"
+#include "PrimaryGeneratorAction.hh"
 
 #include <vector>
 
@@ -32,11 +32,11 @@ EventAction::~EventAction()
 void EventAction::BeginOfEventAction(const G4Event* evt)
 {
   G4int evtNb = evt->GetEventID();
-  if(evtNb%100 == 0 && evtNb!=0 ) 
+  if( evtNb%1 == 0 ) 
   {
-    cout << "---> Begin of Event: " << evtNb << endl;
+    G4cout << "---> Begin of Event: " << evtNb << G4endl;
   }
-
+  
   CreateTree::Instance() -> Clear();
   
   // --------------------- STORE PRIMARY VERTEX ----------------------------- //

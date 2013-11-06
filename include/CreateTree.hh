@@ -11,18 +11,21 @@ using namespace std;
 
 class CreateTree
 {
-  private:
-
+private:
+  
   TTree*              ftree;
   TString             fname;
-  Bool_t	       ENERGY_FIBER;
-  Bool_t	       INIT_DATA; 
-  Bool_t	       POS_FIBER;
-  Bool_t	       OPTICAL;
 
-  public:
-
-  CreateTree(TString name, Bool_t energy_fiber, Bool_t init_data, Bool_t pos_fiber, Bool_t optical);
+public:
+  Bool_t	      ENERGY_FIBER;
+  Bool_t	      INIT_DATA; 
+  Bool_t	      POS_FIBER;
+  Bool_t	      OPTICAL;
+  Bool_t              TIMING;
+  
+public:
+  
+  CreateTree(TString name, Bool_t energy_fiber, Bool_t init_data, Bool_t pos_fiber, Bool_t optical, Bool_t timing);
   ~CreateTree();
 
   TTree*              GetTree() const { return ftree; };
@@ -56,12 +59,36 @@ class CreateTree
   Float_t Total_energy[250][300];
   Float_t Total_nonion_energy[250][300];
   Int_t   Num_phot_cer[250][300];
-
-
+  
   Float_t Total_energy_fibers;
   Float_t Total_nonion_energy_fibers;  
   Float_t Tot_phot_cer;  
   Float_t Total_energy_absorber;
   Float_t Total_energy_world;
   
+  Int_t opPhoton_n;
+  vector<Int_t> opPhoton_process;
+  vector<Int_t> opPhoton_trackID;
+  vector<Int_t> opPhoton_parentTrackID;
+  vector<Int_t> opPhoton_fiberIX;
+  vector<Int_t> opPhoton_fiberIY;
+  vector<Float_t> opPhoton_energy;
+  vector<Float_t> opPhoton_waveLength;
+  vector<Float_t> opPhoton_time;
+  vector<Float_t> opPhoton_vertexX;
+  vector<Float_t> opPhoton_vertexY;
+  vector<Float_t> opPhoton_vertexZ;
+  vector<Float_t> opPhoton_pX;
+  vector<Float_t> opPhoton_pY;
+  vector<Float_t> opPhoton_pZ;
+  
+  Int_t opPhoton_n_det;
+  vector<Int_t> opPhoton_process_det;
+  vector<Int_t> opPhoton_trackID_det;
+  vector<Int_t> opPhoton_parentTrackID_det;
+  vector<Int_t> opPhoton_fiberIX_det;
+  vector<Int_t> opPhoton_fiberIY_det;
+  vector<Float_t> opPhoton_energy_det;
+  vector<Float_t> opPhoton_waveLength_det;
+  vector<Float_t> opPhoton_time_det;
 };

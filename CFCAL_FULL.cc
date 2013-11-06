@@ -65,20 +65,19 @@
 
 #include "G4ios.hh"
 
-//#include "ExN06PhysicsList.hh"
-#include "ExN06PrimaryGeneratorAction.hh"
-#include "ExN06DetectorConstruction.hh"
-#include "ExN06RunAction.hh"
-#include "ExN06StackingAction.hh"
+#include "PrimaryGeneratorAction.hh"
+#include "DetectorConstruction.hh"
+#include "RunAction.hh"
+#include "StackingAction.hh"
 #include "SteppingAction.hh"
 #include "EventAction.hh"
-#include "ExN06SteppingVerbose.hh"
+#include "SteppingVerbose.hh"
 
 #include "CreateTree.hh"
 #include "TString.h"
 
 #include "Randomize.hh"
-#include "TRandom1.h"
+#include "TRandom3.h"
 
 #ifdef G4VIS_USE
 #include "G4VisExecutive.hh"
@@ -98,105 +97,109 @@ long int CreateSeed();
 
 int main(int argc,char** argv)
 {
+  gInterpreter -> GenerateDictionary("vector<float>","vector");
   
-	gInterpreter -> GenerateDictionary("vector<float>","vector");
-	
-	if (argc != 3 && argc != 2)
-	{
-	  cout << "Syntax for exec: crystal <configuration file> <output file>" << endl; 
-	  cout << "Syntax for viz:  crystal <configuration file>" << endl; 
-	  return 0;
-	  
-	}
-	  
-	string file;
-	string filename;
-	TFile* outfile = NULL;
-	  
-  	if(argc == 3) 
-	{
-     	  cout << "Starting exec mode..." << endl; 
-  	  file = argv[2];
-	  filename = file + ".root";
-  	  G4cout << "Writing data to file '" << filename << "' ..." << G4endl;
-	  	
-	  outfile = new TFile((TString)filename,"RECREATE");
-	  outfile -> cd();
-	  	  
-	}
-  	
-  	if (argc == 2)
-	{
-	  cout<<"Starting viz mode..."<<endl; 
-	}
-	
- 
+  if (argc != 3 && argc != 2)
+  {
+    cout << "Syntax for exec: crystal <configuration file> <output file>" << endl; 
+    cout << "Syntax for viz:  crystal <configuration file>" << endl; 
+    return 0;
+  }
   
-  	cout<<"\n"<<endl;
-  	cout<<"######################################################"<<endl;  
-  	cout<<"#                                                    #"<<endl;
-  	cout<<"#  GEANT4 simulation of sampling calorimeter         #"<<endl;  
-  	cout<<"#         based on LuAG crystal fibers.              #"<<endl;  
-  	cout<<"#  Author: Marco Lucchini, CERN, 2013				#"<<endl;
-  	cout<<"#                                                    #"<<endl;  
-  	cout<<"######################################################"<<endl;
-  	cout<<"\n\n"<<endl;
-  	cout<<"=====>   C O N F I G U R A T I O N   <====\n"<<endl;
-
-  	G4cout << "Configuration file: '" << argv[1] << "'" << G4endl;
-  	ConfigFile config(argv[1]);
-
-  	// Crystal parameters
-  	G4double absorber_x = config.read<double>("absorber_x");
-	G4cout << "Absorber x [mm]: " << absorber_x << G4endl;
- 
-   	G4double absorber_y = config.read<double>("absorber_y");
-  	G4cout << "Absorber y [mm]: " << absorber_y << G4endl;
- 
-   	G4double absorber_z = config.read<double>("absorber_z");
-  	G4cout << "Absorber z [mm]: " << absorber_z << G4endl;
-  	
-   	G4double NFIBERS_X = config.read<double>("NFIBERS_X");
-  	G4cout << "NFIBERS_X: " << NFIBERS_X << G4endl;
-   	G4double NFIBERS_Y = config.read<double>("NFIBERS_Y");
-  	G4cout << "NFIBERS_Y: " << NFIBERS_Y << G4endl;
-  	
-   	G4double spacingX = config.read<double>("spacingX");
-  	G4cout << "spacingX [mm]: " << spacingX << G4endl;
-  	G4double spacingY = config.read<double>("spacingY");
-  	G4cout << "spacingY [mm]: " << spacingY << G4endl;
+  string file;
+  string filename;
+  TFile* outfile = NULL;
+  
+  if(argc == 3) 
+  {
+    cout << "Starting exec mode..." << endl; 
+    file = argv[2];
+    filename = file + ".root";
+    G4cout << "Writing data to file '" << filename << "' ..." << G4endl;
+    
+    outfile = new TFile((TString)filename,"RECREATE");
+    outfile -> cd();
+    
+  }
+  
+  if (argc == 2)
+  {
+    cout<<"Starting viz mode..."<<endl; 
+  }
+  
+  
+  
+  cout<<"\n"<<endl;
+  cout<<"######################################################"<<endl;  
+  cout<<"#                                                    #"<<endl;
+  cout<<"#  GEANT4 simulation of sampling calorimeter         #"<<endl;  
+  cout<<"#         based on LuAG crystal fibers.              #"<<endl;  
+  cout<<"#  Author: Marco Lucchini, CERN, 2013				#"<<endl;
+  cout<<"#                                                    #"<<endl;  
+  cout<<"######################################################"<<endl;
+  cout<<"\n\n"<<endl;
+  cout<<"=====>   C O N F I G U R A T I O N   <====\n"<<endl;
+  
+  G4cout << "Configuration file: '" << argv[1] << "'" << G4endl;
+  ConfigFile config(argv[1]);
+  
+  // Crystal parameters
+  G4double absorber_x = config.read<double>("absorber_x");
+  G4cout << "Absorber x [mm]: " << absorber_x << G4endl;
+  
+  G4double absorber_y = config.read<double>("absorber_y");
+  G4cout << "Absorber y [mm]: " << absorber_y << G4endl;
+  
+  G4double absorber_z = config.read<double>("absorber_z");
+  G4cout << "Absorber z [mm]: " << absorber_z << G4endl;
+  
+  G4double NFIBERS_X = config.read<double>("NFIBERS_X");
+  G4cout << "NFIBERS_X: " << NFIBERS_X << G4endl;
+  G4double NFIBERS_Y = config.read<double>("NFIBERS_Y");
+  G4cout << "NFIBERS_Y: " << NFIBERS_Y << G4endl;
+  
+  G4double spacingX = config.read<double>("spacingX");
+  G4cout << "spacingX [mm]: " << spacingX << G4endl;
+  G4double spacingY = config.read<double>("spacingY");
+  G4cout << "spacingY [mm]: " << spacingY << G4endl;
   
   
   // Seed the random number generator manually
   //
-  G4long myseed = CreateSeed();
+  G4long myseed = config.read<long int>("seed");
+  if( myseed == -1 )
+  {
+    G4cout << "Creating random seed..." << G4endl;
+    myseed = CreateSeed();
+  }
+  G4cout << "Random seed : " << myseed << G4endl;
   CLHEP::HepRandom::setTheSeed(myseed);
   
-  //  string name		= argv[1];
-  Bool_t energy_data 	= 1;
-  Bool_t init_data 	= 1;
-  Bool_t pos_fiber 	= 0;
-  Bool_t optical 	= 1;
-    
-  CreateTree* mytree = new CreateTree("H2_sim", energy_data, init_data, pos_fiber, optical);
-
+  
+  G4bool energy_data = 1;
+  G4bool init_data   = 1;
+  G4bool pos_fiber   = 0;
+  G4bool optical     = 1;
+  G4bool timing      = 1;
+  CreateTree* mytree = new CreateTree("H2_sim", energy_data, init_data, pos_fiber, optical, timing);
+  
   // User Verbose output class
   //
-  G4VSteppingVerbose* verbosity = new ExN06SteppingVerbose;
+  G4VSteppingVerbose* verbosity = new SteppingVerbose;
   G4VSteppingVerbose::SetInstance(verbosity);
   
-
+  
   
   // Run manager
   //
   G4RunManager* runManager = new G4RunManager;
-
-
+  
+  
   //G4VUserPhysicsList* physics = new ExN06PhysicsList;
   //runManager-> SetUserInitialization(physics);
-
+  
   //Physics list defined using PhysListFactory
-    
+  
   std::string physName("");
   
   G4PhysListFactory factory;
@@ -204,7 +207,7 @@ int main(int argc,char** argv)
   for ( unsigned n=0; n != names.size(); n++ ) {
     G4cout << "PhysicsList: " << names[n] << G4endl;
   }
-
+  
   if ( "" == physName ) {
     char * path = getenv("PHYSLIST");
     if ( path ) { physName = G4String(path); }
@@ -216,126 +219,140 @@ int main(int argc,char** argv)
  
   std::cout << "Using physics list: " << physName << std::endl; 
   
+  
   //
   // UserInitialization classes - mandatory
   
   // set physics list
-  G4VModularPhysicsList * physics = factory.GetReferencePhysList(physName);
+  G4cout << ">>> Define physics list::begin <<<" << G4endl; 
+  G4VModularPhysicsList* physics = factory.GetReferencePhysList(physName);
   physics->RegisterPhysics(new G4EmUserPhysics(0));
   runManager-> SetUserInitialization(physics);
+  G4cout << ">>> Define physics list::end <<<" << G4endl; 
   
   //
-  G4VUserPrimaryGeneratorAction* gen_action = new ExN06PrimaryGeneratorAction;
+  G4cout << ">>> Define PrimaryGeneratorAction::begin <<<" << G4endl; 
+  G4VUserPrimaryGeneratorAction* gen_action = new PrimaryGeneratorAction;
   runManager->SetUserAction(gen_action);
+  G4cout << ">>> Define PrimaryGeneratorAction::end <<<" << G4endl; 
   //
-  G4VUserDetectorConstruction* detector = new ExN06DetectorConstruction(argv[1]);
+  G4cout << ">>> Define DetectorConstruction::begin <<<" << G4endl; 
+  G4VUserDetectorConstruction* detector = new DetectorConstruction(argv[1]);
   runManager-> SetUserInitialization(detector);
+  G4cout << ">>> Define DetectorConstruction::end <<<" << G4endl; 
   
   // UserAction classes
   //
-  G4UserRunAction* run_action = new ExN06RunAction;
+  G4cout << ">>> Define RunAction::begin <<<" << G4endl; 
+  G4UserRunAction* run_action = new RunAction;
   runManager->SetUserAction(run_action);  
+  G4cout << ">>> Define RunAction::end <<<" << G4endl; 
   //
+  G4cout << ">>> Define EventAction::begin <<<" << G4endl; 
   G4UserEventAction* event_action = new EventAction;
   runManager->SetUserAction(event_action);
+  G4cout << ">>> Define EventAction::end <<<" << G4endl; 
   //
-  G4UserStackingAction* stacking_action = new ExN06StackingAction;
+  G4cout << ">>> Define StackingAction::begin <<<" << G4endl; 
+  G4UserStackingAction* stacking_action = new StackingAction;
   runManager->SetUserAction(stacking_action);
+  G4cout << ">>> Define StackingAction::end <<<" << G4endl; 
   //
+  G4cout << ">>> Define SteppingAction::begin <<<" << G4endl; 
   SteppingAction* stepping_action = new SteppingAction;
-  runManager->SetUserAction(stepping_action);
+  runManager->SetUserAction(stepping_action); 
+  G4cout << ">>> Define SteppingAction::end <<<" << G4endl;  
   
-   
-	if (argc == 2)   // Define UI session for interactive mode
-	{   
-	  
-	  // Initialize G4 kernel
-	  //
-	  runManager -> Initialize();
-	  
-	  #ifdef G4VIS_USE
-	  G4VisManager* visManager = new G4VisExecutive;
-	  visManager -> Initialize();
-	  #endif
+  
+  if (argc == 2)   // Define UI session for interactive mode
+  {   
+    // Initialize G4 kernel
+    //
+    runManager -> Initialize();
     
-	  G4UImanager* UImanager = G4UImanager::GetUIpointer(); 
-	  #ifdef G4UI_USE
-	  G4UIExecutive * ui = new G4UIExecutive(argc,argv);
-	  #ifdef G4VIS_USE
-	  UImanager -> ApplyCommand("/control/execute vis.mac");     
-	  #endif
-	  ui -> SessionStart();
-	  delete ui;
-	  #endif 
+    #ifdef G4VIS_USE
+    G4VisManager* visManager = new G4VisExecutive;
+    visManager -> Initialize();
+    #endif
+    
+    G4UImanager* UImanager = G4UImanager::GetUIpointer(); 
+    #ifdef G4UI_USE
+    G4UIExecutive * ui = new G4UIExecutive(argc,argv);
+    #ifdef G4VIS_USE
+    UImanager -> ApplyCommand("/control/execute vis.mac");     
+    #endif
+    ui -> SessionStart();
+    delete ui;
+    #endif 
    
-	  #ifdef G4VIS_USE
-	  delete visManager;
-	  #endif  
-	}
-	else
-	{
-	  runManager -> Initialize();
-	  G4UImanager* UImanager = G4UImanager::GetUIpointer(); 
-	  UImanager -> ApplyCommand("/control/execute gps.mac");
-	} 
-
-	// Job termination
-	// Free the store: user actions, physics_list and detector_description are
-	// 		   owned and deleted by the run manager, so they should not
-	//                be deleted in the main() program !
+    #ifdef G4VIS_USE
+    delete visManager;
+    #endif  
+  }
+  else
+  {
+    runManager -> Initialize();
+    G4UImanager* UImanager = G4UImanager::GetUIpointer(); 
+    UImanager -> ApplyCommand("/control/execute gps.mac");
+  } 
   
-	delete runManager;
-	delete verbosity;
-
-	if(argc == 3) 
-	{
-	  G4cout << "Writing tree to file " << filename << " ..." << G4endl;
-	  
-	  mytree -> GetTree() -> Write();
+  // Job termination
+  // Free the store: user actions, physics_list and detector_description are
+  // 		   owned and deleted by the run manager, so they should not
+  //                be deleted in the main() program !
+  
+  delete runManager;
+  delete verbosity;
+  
+  if(argc == 3) 
+  {
+    G4cout << "Writing tree to file " << filename << " ..." << G4endl;
+    
+    mytree -> GetTree() -> Write();
 //	  gAbsorption->Write();
 //	  outfile -> Write();
-	  outfile -> Close();
-	}
-
-
+    outfile -> Close();
+  }
+  
   return 0;
 }
 
 
+
 long int CreateSeed()
 {
-  	TRandom1 rangen;
-  	long int s = time(0);
-  	cout<<"Time : "<<s<<endl;
-  	s+=getpid();
-  	cout<<"PID  : "<<getpid()<<endl;
+  TRandom3 rangen;
+  long int s = time(0);
+  cout<<"Time : "<<s<<endl;
+  s+=getpid();
+  cout<<"PID  : "<<getpid()<<endl;
   
-  	FILE * fp = fopen ("/proc/uptime", "r");
-  	int uptime,upsecs;
-  	if (fp != NULL)
-    	{
-      		char buf[BUFSIZ];
-      		int res;
-      		char *b = fgets (buf, BUFSIZ, fp);
-      		if (b == buf)
-        	{
-          		/* The following sscanf must use the C locale.  */
-          		setlocale (LC_NUMERIC, "C");
-          		res = sscanf (buf, "%i", &upsecs);
-          		setlocale (LC_NUMERIC, "");
-          		if (res == 1) uptime = (time_t) upsecs;
-        	}
-      		fclose (fp);
-    	}
-
-  	cout<<"Uptime: "<<upsecs<<endl;
-  	s+=upsecs;
+  FILE * fp = fopen ("/proc/uptime", "r");
+  int uptime,upsecs;
+  if (fp != NULL)
+  {
+    char buf[BUFSIZ];
+    int res;
+    char *b = fgets (buf, BUFSIZ, fp);
+    if (b == buf)
+    {
+      /* The following sscanf must use the C locale.  */
+      setlocale (LC_NUMERIC, "C");
+      res = sscanf (buf, "%i", &upsecs);
+      setlocale (LC_NUMERIC, "");
+      if (res == 1) uptime = (time_t) upsecs;
+    }
+    fclose (fp);
+  }
   
-  	cout<<"Seed for srand: "<<s<<endl;
-  	srand(s);
-  	rangen.SetSeed(rand());
-  	long int seed = round(1000000*rangen.Uniform());
-  	return seed;
+  cout<<"Uptime: "<<upsecs<<endl;
+  s+=upsecs;
+  
+  cout<<"Seed for srand: "<<s<<endl;
+  srand(s);
+  rangen.SetSeed(rand());
+  long int seed = round(1000000*rangen.Uniform());
+  return seed;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
