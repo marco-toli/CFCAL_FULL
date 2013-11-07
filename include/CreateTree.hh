@@ -1,94 +1,90 @@
-// Martin Goettlich @ DESY
-//
 #include <iostream>
+#include <vector>
 
 #include "TFile.h"
 #include "TTree.h"
 #include "TString.h"
-#include <vector>
 
-using namespace std;
+
 
 class CreateTree
 {
 private:
   
-  TTree*              ftree;
-  TString             fname;
-
-public:
-  Bool_t	      ENERGY_FIBER;
-  Bool_t	      INIT_DATA; 
-  Bool_t	      POS_FIBER;
-  Bool_t	      OPTICAL;
-  Bool_t              TIMING;
+  TTree*  ftree;
+  TString fname;
   
 public:
   
-  CreateTree(TString name, Bool_t energy_fiber, Bool_t init_data, Bool_t pos_fiber, Bool_t optical, Bool_t timing);
+  bool ENERGY_FIBER;
+  bool INIT_DATA; 
+  bool POS_FIBER;
+  bool TIMING;
+  
+public:
+  
+  CreateTree(TString name, bool energy_fiber, bool init_data, bool pos_fiber, bool timing);
   ~CreateTree();
-
-  TTree*              GetTree() const { return ftree; };
-  TString             GetName() const { return fname;};
-  Int_t               Fill() { return this->GetTree()->Fill(); };
-  Bool_t              Write();
-  void                Clear();
-  static CreateTree*  Instance() { return fInstance; };
-  static CreateTree*  fInstance;
   
-  Bool_t	       Energy_fiber() const { return this -> ENERGY_FIBER; };
-  Bool_t	       Init_data()    const { return this -> INIT_DATA;    };
-  Bool_t	       Pos_fiber()    const { return this -> POS_FIBER;    };
-  Bool_t	       Optical()      const { return this -> OPTICAL;	   };
+  TTree*             GetTree() const { return ftree; };
+  TString            GetName() const { return fname; };
+  int                Fill() { return this->GetTree()->Fill(); };
+  bool               Write();
+  void               Clear();
+  static CreateTree* Instance() { return fInstance; };
+  static CreateTree* fInstance;
   
-  Int_t               Event;
+  bool Energy_fiber() const { return this -> ENERGY_FIBER; };
+  bool Init_data()    const { return this -> INIT_DATA;    };
+  bool Pos_fiber()    const { return this -> POS_FIBER;    };
+  bool Timing()       const { return this -> TIMING;       };
   
-  Float_t InitialPositionX;
-  Float_t InitialPositionY;
-  Float_t InitialPositionZ;
+  int Event;
   
-  Float_t InitalMomentumDirectionX;
-  Float_t InitalMomentumDirectionY;
-  Float_t InitalMomentumDirectionZ;
-
-  vector<Float_t> Energy_deposited;
-  vector<Float_t> depositionX;
-  vector<Float_t> depositionY;
-  vector<Float_t> depositionZ;
+  float InitialPositionX;
+  float InitialPositionY;
+  float InitialPositionZ;
   
-  Float_t Total_energy[250][300];
-  Float_t Total_nonion_energy[250][300];
-  Int_t   Num_phot_cer[250][300];
+  float InitalMomentumDirectionX;
+  float InitalMomentumDirectionY;
+  float InitalMomentumDirectionZ;
   
-  Float_t Total_energy_fibers;
-  Float_t Total_nonion_energy_fibers;  
-  Float_t Tot_phot_cer;  
-  Float_t Total_energy_absorber;
-  Float_t Total_energy_world;
+  std::vector<float> Energy_deposited;
+  std::vector<float> depositionX;
+  std::vector<float> depositionY;
+  std::vector<float> depositionZ;
   
-  Int_t opPhoton_n;
-  vector<Int_t> opPhoton_process;
-  vector<Int_t> opPhoton_trackID;
-  vector<Int_t> opPhoton_parentTrackID;
-  vector<Int_t> opPhoton_fiberIX;
-  vector<Int_t> opPhoton_fiberIY;
-  vector<Float_t> opPhoton_energy;
-  vector<Float_t> opPhoton_waveLength;
-  vector<Float_t> opPhoton_time;
-  vector<Float_t> opPhoton_vertexX;
-  vector<Float_t> opPhoton_vertexY;
-  vector<Float_t> opPhoton_vertexZ;
-  vector<Float_t> opPhoton_pX;
-  vector<Float_t> opPhoton_pY;
-  vector<Float_t> opPhoton_pZ;
+  float Total_energy_fibers;
+  float Total_nonion_energy_fibers;  
+  float Total_energy_absorber;
+  float Total_energy_world;
   
-  Int_t opPhoton_n_det;
-  vector<Int_t> opPhoton_process_det;
-  vector<Int_t> opPhoton_trackID_det;
-  vector<Int_t> opPhoton_parentTrackID_det;
-  vector<Int_t> opPhoton_fiberIX_det;
-  vector<Int_t> opPhoton_fiberIY_det;
-  vector<Float_t> opPhoton_energy_det;
-  vector<Float_t> opPhoton_waveLength_det;
-  vector<Float_t> opPhoton_time_det;
+  float Total_energy[250][300];
+  float Total_nonion_energy[250][300];
+  
+  int opPhoton_n;
+  std::vector<int> opPhoton_process;
+  std::vector<int> opPhoton_trackID;
+  std::vector<int> opPhoton_parentTrackID;
+  std::vector<int> opPhoton_fiberIX;
+  std::vector<int> opPhoton_fiberIY;
+  std::vector<float> opPhoton_energy;
+  std::vector<float> opPhoton_waveLength;
+  std::vector<float> opPhoton_time;
+  std::vector<float> opPhoton_vertexX;
+  std::vector<float> opPhoton_vertexY;
+  std::vector<float> opPhoton_vertexZ;
+  std::vector<float> opPhoton_pX;
+  std::vector<float> opPhoton_pY;
+  std::vector<float> opPhoton_pZ;
+  
+  int opPhoton_n_det;
+  std::vector<int> opPhoton_process_det;
+  std::vector<int> opPhoton_trackID_det;
+  std::vector<int> opPhoton_parentTrackID_det;
+  std::vector<int> opPhoton_fiberIX_det;
+  std::vector<int> opPhoton_fiberIY_det;
+  std::vector<float> opPhoton_energy_det;
+  std::vector<float> opPhoton_waveLength_det;
+  std::vector<float> opPhoton_time_det;
 };

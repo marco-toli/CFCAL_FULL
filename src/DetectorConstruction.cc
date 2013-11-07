@@ -78,19 +78,18 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   //---------------------------------------
   //------------- Parameters --------------
   //---------------------------------------
-
-
   
   brass_hole_radius = fiber_radius + 0.1*mm;
   
   absorber_z = fiber_length;
   absorber_y = (NFIBERS_Y +1) * spacingY;
   absorber_x = (NFIBERS_X +1) * spacingX;
-    
+  
+  
+  
   //------------------------------------
   //------------- Volumes --------------
   //------------------------------------
-  
   
   // The experimental Hall
   G4Box* expHall_box = new G4Box("World",expHall_x,expHall_y,expHall_z);
@@ -111,7 +110,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
       else              x[iF_X][iF_Y] = -(NFIBERS_X)/2*spacingX + iF_X*spacingX + spacingX/2;
       
       y[iF_X][iF_Y] = (NFIBERS_Y)/2*spacingY - iF_Y*spacingY;
-      G4cout << " x,y fiber[" << iF_X << "]["<<iF_Y<< "] = (" << x[iF_X][iF_Y] << "," << y[iF_X][iF_Y] << ")" << G4endl;
+      //G4cout << " x,y fiber[" << iF_X << "]["<<iF_Y<< "] = (" << x[iF_X][iF_Y] << "," << y[iF_X][iF_Y] << ")" << G4endl;
     }
   }
   
@@ -133,10 +132,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4LogicalVolume* Det_log = new G4LogicalVolume(Det_solid,DeMaterial,"Det_log",0,0,0);
   
   // physical: placement 
-  G4RotationMatrix *pRot = new G4RotationMatrix;
-  pRot->rotateX(M_PI/2.*rad);
+  //G4RotationMatrix *pRot = new G4RotationMatrix;
+  //pRot->rotateX(M_PI/2.*rad);
   
-  G4VPhysicalVolume* Box_abs_phys = new G4PVPlacement(pRot, G4ThreeVector(0,0,0), Box_abs_log, "Box_abs_phys", expHall_log, false, 0);
+  G4VPhysicalVolume* Box_abs_phys = new G4PVPlacement(0, G4ThreeVector(0,0,0), Box_abs_log, "Box_abs_phys", expHall_log, false, 0);
   G4VPhysicalVolume* Brass_hole_phys[250][300];
   G4VPhysicalVolume* Crystal_phys[250][300];
   G4VPhysicalVolume* Win_front_phys[250][300];

@@ -42,42 +42,32 @@
 //     
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#include <time.h>
+#include <iostream>
 #include <string>
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/resource.h>
 #include <vector>
+#include <ctime>
+
+#include "TString.h"
+#include "TRandom3.h"
+#include "TCint.h"
 
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
-#include "G4UIterminal.hh"
-#include "G4UItcsh.hh"
-
 #include "G4PhysListFactory.hh"
 #include "G4EmUserPhysics.hh"
 #include "G4EmStandardPhysics.hh"
 #include "G4VModularPhysicsList.hh"
+
 #include "LHEP.hh"
 #include "QGSP_BERT.hh"
-
-#include "G4ios.hh"
 
 #include "PrimaryGeneratorAction.hh"
 #include "DetectorConstruction.hh"
 #include "RunAction.hh"
-#include "StackingAction.hh"
 #include "SteppingAction.hh"
 #include "EventAction.hh"
 #include "SteppingVerbose.hh"
-
 #include "CreateTree.hh"
-#include "TString.h"
-
-#include "Randomize.hh"
-#include "TRandom3.h"
 
 #ifdef G4VIS_USE
 #include "G4VisExecutive.hh"
@@ -87,9 +77,7 @@
 #include "G4UIExecutive.hh"
 #endif
 
-#include "TCint.h"
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 long int CreateSeed();
 
@@ -97,7 +85,7 @@ long int CreateSeed();
 
 int main(int argc,char** argv)
 {
-  gInterpreter -> GenerateDictionary("vector<float>","vector");
+  //gInterpreter -> GenerateDictionary("vector<float>","vector");
   
   if (argc != 3 && argc != 2)
   {
@@ -119,7 +107,6 @@ int main(int argc,char** argv)
     
     outfile = new TFile((TString)filename,"RECREATE");
     outfile -> cd();
-    
   }
   
   if (argc == 2)
@@ -134,7 +121,7 @@ int main(int argc,char** argv)
   cout<<"#                                                    #"<<endl;
   cout<<"#  GEANT4 simulation of sampling calorimeter         #"<<endl;  
   cout<<"#         based on LuAG crystal fibers.              #"<<endl;  
-  cout<<"#  Author: Marco Lucchini, CERN, 2013				#"<<endl;
+  cout<<"#  Author: Marco Lucchini, CERN, 2013                #"<<endl;
   cout<<"#                                                    #"<<endl;  
   cout<<"######################################################"<<endl;
   cout<<"\n\n"<<endl;
@@ -142,26 +129,6 @@ int main(int argc,char** argv)
   
   G4cout << "Configuration file: '" << argv[1] << "'" << G4endl;
   ConfigFile config(argv[1]);
-  
-  // Crystal parameters
-  G4double absorber_x = config.read<double>("absorber_x");
-  G4cout << "Absorber x [mm]: " << absorber_x << G4endl;
-  
-  G4double absorber_y = config.read<double>("absorber_y");
-  G4cout << "Absorber y [mm]: " << absorber_y << G4endl;
-  
-  G4double absorber_z = config.read<double>("absorber_z");
-  G4cout << "Absorber z [mm]: " << absorber_z << G4endl;
-  
-  G4double NFIBERS_X = config.read<double>("NFIBERS_X");
-  G4cout << "NFIBERS_X: " << NFIBERS_X << G4endl;
-  G4double NFIBERS_Y = config.read<double>("NFIBERS_Y");
-  G4cout << "NFIBERS_Y: " << NFIBERS_Y << G4endl;
-  
-  G4double spacingX = config.read<double>("spacingX");
-  G4cout << "spacingX [mm]: " << spacingX << G4endl;
-  G4double spacingY = config.read<double>("spacingY");
-  G4cout << "spacingY [mm]: " << spacingY << G4endl;
   
   
   // Seed the random number generator manually
@@ -179,63 +146,57 @@ int main(int argc,char** argv)
   G4bool energy_data = 1;
   G4bool init_data   = 1;
   G4bool pos_fiber   = 0;
-  G4bool optical     = 1;
-  G4bool timing      = 1;
-  CreateTree* mytree = new CreateTree("H2_sim", energy_data, init_data, pos_fiber, optical, timing);
+  G4bool timing      = 0;
+  CreateTree* mytree = new CreateTree("tree", energy_data, init_data, pos_fiber, timing);
+  
   
   // User Verbose output class
   //
   G4VSteppingVerbose* verbosity = new SteppingVerbose;
   G4VSteppingVerbose::SetInstance(verbosity);
   
-  
-  
   // Run manager
   //
   G4RunManager* runManager = new G4RunManager;
   
   
-  //G4VUserPhysicsList* physics = new ExN06PhysicsList;
-  //runManager-> SetUserInitialization(physics);
-  
   //Physics list defined using PhysListFactory
-  
+  //
   std::string physName("");
   
   G4PhysListFactory factory;
-  const std::vector<G4String> & names = factory.AvailablePhysLists();
-  for ( unsigned n=0; n != names.size(); n++ ) {
+  const std::vector<G4String>& names = factory.AvailablePhysLists();
+  for(unsigned n = 0; n != names.size(); n++)
     G4cout << "PhysicsList: " << names[n] << G4endl;
+  
+  if( physName == "")
+  {
+    char* path = getenv("PHYSLIST");
+    if( path ) physName = G4String(path);
   }
   
-  if ( "" == physName ) {
-    char * path = getenv("PHYSLIST");
-    if ( path ) { physName = G4String(path); }
-  }
-
-  if ( "" == physName || factory.IsReferencePhysList(physName)) {
+  if ( physName == "" || factory.IsReferencePhysList(physName))
+  {
     physName = "FTFP_BERT";
   }
- 
+  
   std::cout << "Using physics list: " << physName << std::endl; 
   
   
-  //
   // UserInitialization classes - mandatory
+  //
   
-  // set physics list
   G4cout << ">>> Define physics list::begin <<<" << G4endl; 
   G4VModularPhysicsList* physics = factory.GetReferencePhysList(physName);
   physics->RegisterPhysics(new G4EmUserPhysics(0));
   runManager-> SetUserInitialization(physics);
   G4cout << ">>> Define physics list::end <<<" << G4endl; 
   
-  //
   G4cout << ">>> Define PrimaryGeneratorAction::begin <<<" << G4endl; 
   G4VUserPrimaryGeneratorAction* gen_action = new PrimaryGeneratorAction;
   runManager->SetUserAction(gen_action);
   G4cout << ">>> Define PrimaryGeneratorAction::end <<<" << G4endl; 
-  //
+  
   G4cout << ">>> Define DetectorConstruction::begin <<<" << G4endl; 
   G4VUserDetectorConstruction* detector = new DetectorConstruction(argv[1]);
   runManager-> SetUserInitialization(detector);
@@ -243,21 +204,17 @@ int main(int argc,char** argv)
   
   // UserAction classes
   //
+  
   G4cout << ">>> Define RunAction::begin <<<" << G4endl; 
   G4UserRunAction* run_action = new RunAction;
   runManager->SetUserAction(run_action);  
   G4cout << ">>> Define RunAction::end <<<" << G4endl; 
-  //
+  
   G4cout << ">>> Define EventAction::begin <<<" << G4endl; 
   G4UserEventAction* event_action = new EventAction;
   runManager->SetUserAction(event_action);
   G4cout << ">>> Define EventAction::end <<<" << G4endl; 
-  //
-  G4cout << ">>> Define StackingAction::begin <<<" << G4endl; 
-  G4UserStackingAction* stacking_action = new StackingAction;
-  runManager->SetUserAction(stacking_action);
-  G4cout << ">>> Define StackingAction::end <<<" << G4endl; 
-  //
+  
   G4cout << ">>> Define SteppingAction::begin <<<" << G4endl; 
   SteppingAction* stepping_action = new SteppingAction;
   runManager->SetUserAction(stepping_action); 
@@ -298,8 +255,8 @@ int main(int argc,char** argv)
   
   // Job termination
   // Free the store: user actions, physics_list and detector_description are
-  // 		   owned and deleted by the run manager, so they should not
-  //                be deleted in the main() program !
+  // owned and deleted by the run manager, so they should not
+  // be deleted in the main() program !
   
   delete runManager;
   delete verbosity;
@@ -309,8 +266,6 @@ int main(int argc,char** argv)
     G4cout << "Writing tree to file " << filename << " ..." << G4endl;
     
     mytree -> GetTree() -> Write();
-//	  gAbsorption->Write();
-//	  outfile -> Write();
     outfile -> Close();
   }
   
@@ -354,5 +309,3 @@ long int CreateSeed()
   long int seed = round(1000000*rangen.Uniform());
   return seed;
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

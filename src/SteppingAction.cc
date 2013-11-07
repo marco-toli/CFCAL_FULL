@@ -72,7 +72,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
     
     if( (CreateTree::Instance()->TIMING && processName != "Cerenkov") ||
         (!CreateTree::Instance()->TIMING) )
-      theTrack->SetTrackStatus(fKillTrackAndSecondaries);
+    theTrack->SetTrackStatus(fKillTrackAndSecondaries);
     
     
     

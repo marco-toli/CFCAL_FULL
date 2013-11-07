@@ -1,13 +1,15 @@
+
 #include "CreateTree.hh"
-#include <vector>
+
+
 
 CreateTree* CreateTree::fInstance = NULL;
 
-using namespace std;
 
-CreateTree::CreateTree(TString name, Bool_t energy_fiber, Bool_t init_data, Bool_t pos_fiber, Bool_t optical, Bool_t timing)
+
+CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos_fiber, bool timing)
 {
-  if(fInstance)
+  if( fInstance )
   {
     return;
   }
@@ -15,19 +17,18 @@ CreateTree::CreateTree(TString name, Bool_t energy_fiber, Bool_t init_data, Bool
   this -> ENERGY_FIBER 	= energy_fiber;
   this -> INIT_DATA    	= init_data;
   this -> POS_FIBER    	= pos_fiber;
-  this -> OPTICAL	= optical;
   this -> TIMING        = timing;
   
   this -> fInstance = this;
   this -> fname     = name;
-  this -> ftree     = new TTree("tree","name");
+  this -> ftree     = new TTree(name,name);
   
   this->GetTree()->Branch("Event",&this->Event,"Event/I");
   
-  if( this -> OPTICAL )
-  {
-    this->GetTree()->Branch("Num_phot_cer",&this->Num_phot_cer,"Num_phot_cer[250][300]/I");
-  }
+  this->GetTree()->Branch("Total_energy_fibers",&this->Total_energy_fibers,"Total_energy_fibers/F");
+  this->GetTree()->Branch("Total_nonion_energy_fibers",&this->Total_nonion_energy_fibers,"Total_nonion_energy_fibers/F");
+  this->GetTree()->Branch("Total_energy_absorber",&this->Total_energy_absorber,"Total_energy_absorber/F");
+  this->GetTree()->Branch("Total_energy_world",&this->Total_energy_world,"Total_energy_world/F");
   
   if( this -> INIT_DATA )
   {
@@ -39,7 +40,7 @@ CreateTree::CreateTree(TString name, Bool_t energy_fiber, Bool_t init_data, Bool
     this->GetTree()->Branch("InitalMomentumDirectionY",&this->InitalMomentumDirectionY,"InitalMomentumDirectionY/F");
     this->GetTree()->Branch("InitalMomentumDirectionZ",&this->InitalMomentumDirectionZ,"InitalMomentumDirectionZ/F");
   }
-	
+  
   if( this -> POS_FIBER)
   { 
     this->GetTree()->Branch("depositionX",&this->depositionX);
@@ -53,12 +54,6 @@ CreateTree::CreateTree(TString name, Bool_t energy_fiber, Bool_t init_data, Bool
     this->GetTree()->Branch("Total_energy",&this->Total_energy,"Total_energy[250][300]/F");
     this->GetTree()->Branch("Total_nonion_energy",&this->Total_nonion_energy,"Total_nonion_energy[250][300]/F");	  
   }
-  
-  this->GetTree()->Branch("Total_energy_fibers",&this->Total_energy_fibers,"Total_energy_fibers/F");
-  this->GetTree()->Branch("Total_nonion_energy_fibers",&this->Total_nonion_energy_fibers,"Total_nonion_energy_fibers/F");
-  this->GetTree()->Branch("Tot_phot_cer",&this->Tot_phot_cer,"Tot_phot_cer/F");
-  this->GetTree()->Branch("Total_energy_absorber",&this->Total_energy_absorber,"Total_energy_absorber/F");
-  this->GetTree()->Branch("Total_energy_world",&this->Total_energy_world,"Total_energy_world/F");
   
   if( this -> TIMING)
   {
@@ -99,7 +94,7 @@ CreateTree::~CreateTree()
 
 
 
-Bool_t CreateTree::Write()
+bool CreateTree::Write()
 {
   TString filename = this->GetName();
   filename+=".root";
@@ -114,30 +109,18 @@ Bool_t CreateTree::Write()
 
 void CreateTree::Clear()
 {
-  Event			= 0;
+  Event	= 0;
   
-  Total_energy_fibers		= 0;
-  Total_nonion_energy_fibers	= 0;
-  Tot_phot_cer			= 0;		
-  Total_energy_absorber		= 0;
-  Total_energy_world		= 0;
-	
-  if( this->OPTICAL )
-  {
-    for (int iF_X = 0; iF_X < 250; iF_X++)
-    {
-      for (int iF_Y = 0; iF_Y < 300; iF_Y++)
-      {
-        Num_phot_cer[iF_X][iF_Y] = 0;
-      }
-    }	  
-  }
+  Total_energy_fibers        = 0;
+  Total_nonion_energy_fibers = 0;
+  Total_energy_absorber      = 0;
+  Total_energy_world         = 0;
   
   if( this->INIT_DATA )
   {
-    InitialPositionX 	= 0;
-    InitialPositionY 	= 0;
-    InitialPositionZ 	= 0;
+    InitialPositionX = 0;
+    InitialPositionY = 0;
+    InitialPositionZ = 0;
     
     InitalMomentumDirectionX = 0;
     InitalMomentumDirectionY = 0;
