@@ -36,9 +36,6 @@
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "G4GeneralParticleSource.hh"
 
-#include "globals.hh"
-
-class G4ParticleGun;
 class G4Event;
 class G4GeneralParticleSource;
 
@@ -49,14 +46,13 @@ class G4GeneralParticleSource;
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
 public:
-  PrimaryGeneratorAction();
+  PrimaryGeneratorAction(const G4ThreeVector& posCentre);
   ~PrimaryGeneratorAction();
   
 public:
   void GeneratePrimaries(G4Event*);
   
 private:
-  G4ParticleGun* particleGun;
   G4GeneralParticleSource* gun;
 };
 

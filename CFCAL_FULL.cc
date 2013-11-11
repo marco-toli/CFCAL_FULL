@@ -85,7 +85,8 @@ long int CreateSeed();
 
 int main(int argc,char** argv)
 {
-  //gInterpreter -> GenerateDictionary("vector<float>","vector");
+  gInterpreter -> GenerateDictionary("vector<float>","vector");
+  
   
   if (argc != 3 && argc != 2)
   {
@@ -146,8 +147,9 @@ int main(int argc,char** argv)
   G4bool energy_data = 1;
   G4bool init_data   = 1;
   G4bool pos_fiber   = 0;
+  G4bool opPhotons   = 0;
   G4bool timing      = 0;
-  CreateTree* mytree = new CreateTree("tree", energy_data, init_data, pos_fiber, timing);
+  CreateTree* mytree = new CreateTree("tree", energy_data, init_data, pos_fiber, opPhotons, timing);
   
   
   // User Verbose output class
@@ -192,15 +194,16 @@ int main(int argc,char** argv)
   runManager-> SetUserInitialization(physics);
   G4cout << ">>> Define physics list::end <<<" << G4endl; 
   
-  G4cout << ">>> Define PrimaryGeneratorAction::begin <<<" << G4endl; 
-  G4VUserPrimaryGeneratorAction* gen_action = new PrimaryGeneratorAction;
-  runManager->SetUserAction(gen_action);
-  G4cout << ">>> Define PrimaryGeneratorAction::end <<<" << G4endl; 
-  
   G4cout << ">>> Define DetectorConstruction::begin <<<" << G4endl; 
-  G4VUserDetectorConstruction* detector = new DetectorConstruction(argv[1]);
+  DetectorConstruction* detector = new DetectorConstruction(argv[1]);
   runManager-> SetUserInitialization(detector);
   G4cout << ">>> Define DetectorConstruction::end <<<" << G4endl; 
+  
+  G4cout << ">>> Define PrimaryGeneratorAction::begin <<<" << G4endl; 
+  G4ThreeVector posCentre(0.*m,0.*m,-1.1*(detector->GetAbsorber_z()/m)/2.*m);
+  G4VUserPrimaryGeneratorAction* gen_action = new PrimaryGeneratorAction(posCentre);
+  runManager->SetUserAction(gen_action);
+  G4cout << ">>> Define PrimaryGeneratorAction::end <<<" << G4endl; 
   
   // UserAction classes
   //

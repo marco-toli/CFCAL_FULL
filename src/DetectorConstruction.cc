@@ -53,7 +53,21 @@
 DetectorConstruction::DetectorConstruction(const string& configFileName)
 {
   readConfigFile(configFileName);
-  expHall_x = expHall_y = expHall_z = 5*m;
+  
+  
+  //---------------------------------------
+  //------------- Parameters --------------
+  //---------------------------------------
+  
+  initializeMaterials();
+  
+  expHall_x = expHall_y = expHall_z = 3*m;
+  
+  brass_hole_radius = fiber_radius + 0.1*mm;
+  
+  absorber_x = (NFIBERS_X) * spacingX + 0.5*spacingX;
+  absorber_y = fiber_length;
+  absorber_z = (NFIBERS_Z) * spacingZ;
 }
 
 
@@ -72,21 +86,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4cout << ">>>>>> DetectorConstruction::Construct()::begin <<<<<<" << G4endl;
   
   
-  initializeMaterials();
-  
-  
-  //---------------------------------------
-  //------------- Parameters --------------
-  //---------------------------------------
-  
-  brass_hole_radius = fiber_radius + 0.1*mm;
-  
-  absorber_z = fiber_length;
-  absorber_y = (NFIBERS_Y +1) * spacingY;
-  absorber_x = (NFIBERS_X +1) * spacingX;
-  
-  
-  
   //------------------------------------
   //------------- Volumes --------------
   //------------------------------------
@@ -99,29 +98,28 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
   // assigning X,Y coordinates to each fiber
   G4double x [250][300];
-  G4double y [250][300];
+  G4double z [250][300];
   
-  G4cout << "NFIBERS_X: " << NFIBERS_X << "   NFIBERS_Y: " << NFIBERS_Y << std::endl;
+  G4cout << "NFIBERS_X: " << NFIBERS_X << "   NFIBERS_Z: " << NFIBERS_Z << G4endl;
   for (int iF_X = 0; iF_X < NFIBERS_X; iF_X++)
   {
-    for(int iF_Y = 0; iF_Y < NFIBERS_Y; iF_Y++)
+    for(int iF_Z = 0; iF_Z < NFIBERS_Z; iF_Z++)
     {
-      if( iF_Y%2 == 0 ) x[iF_X][iF_Y] = -(NFIBERS_X)/2*spacingX + iF_X*spacingX;
-      else              x[iF_X][iF_Y] = -(NFIBERS_X)/2*spacingX + iF_X*spacingX + spacingX/2;
-      
-      y[iF_X][iF_Y] = (NFIBERS_Y)/2*spacingY - iF_Y*spacingY;
-      //G4cout << " x,y fiber[" << iF_X << "]["<<iF_Y<< "] = (" << x[iF_X][iF_Y] << "," << y[iF_X][iF_Y] << ")" << G4endl;
+      if( iF_Z%2 == 0 ) x[iF_X][iF_Z] = -(NFIBERS_X)/2*spacingX + iF_X*spacingX - 0.25*spacingX;
+      else              x[iF_X][iF_Z] = -(NFIBERS_X)/2*spacingX + iF_X*spacingX + 0.25*spacingX;
+      z[iF_X][iF_Z] = fiber_radius - 1.*(NFIBERS_Z)/2*spacingZ + iF_Z*spacingZ;
+      //G4cout << " x,y fiber[" << iF_X << "]["<<iF_Z<< "] = (" << x[iF_X][iF_Z] << "," << y[iF_X][iF_Z] << ")" << G4endl;
     }
   }
   
   
   // solids
-  G4Box* Box_abs_solid = new G4Box("Box_abs_solid",0.5*absorber_x,0.5*absorber_y,0.7*absorber_z);
+  G4Box* Box_abs_solid = new G4Box("Box_abs_solid",0.5*absorber_x,0.5*absorber_y,0.5*absorber_z);
   G4Tubs* Brass_hole = new G4Tubs("Brass_hole",fiber_radius, brass_hole_radius,0.5*fiber_length,0.*deg,360.*deg);
   G4Tubs* Crystal_fiber = new G4Tubs("Crystal_fiber",0,fiber_radius,0.5*fiber_length,0.*deg,360.*deg);
   G4Tubs* Win_solid = new G4Tubs("Win_solid",0.0,win_r,0.5*win_l,0.*deg,360.*deg);
-  G4Box* Det_layer_solid = new G4Box("Det_layer_solid",0.5*det_d,0.5*det_d,0.5*depth);
-  G4Box* Det_solid = new G4Box("Det_solid",0.5*det_d,0.5*det_d,0.5*(det_d-depth));
+  G4Box* Det_layer_solid = new G4Box("Det_layer_solid",0.5*det_d,0.5*depth,0.5*det_d);
+  G4Box* Det_solid = new G4Box("Det_solid",0.5*det_d,0.5*(det_d-depth),0.5*det_d);
   
   // logical
   G4LogicalVolume* Box_abs_log = new G4LogicalVolume(Box_abs_solid,AbMaterial, "Box_abs_log", 0,0,0);
@@ -132,8 +130,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4LogicalVolume* Det_log = new G4LogicalVolume(Det_solid,DeMaterial,"Det_log",0,0,0);
   
   // physical: placement 
-  //G4RotationMatrix *pRot = new G4RotationMatrix;
-  //pRot->rotateX(M_PI/2.*rad);
+  G4RotationMatrix* piRot = new G4RotationMatrix;
+  piRot->rotateX(M_PI/2.*rad);
   
   G4VPhysicalVolume* Box_abs_phys = new G4PVPlacement(0, G4ThreeVector(0,0,0), Box_abs_log, "Box_abs_phys", expHall_log, false, 0);
   G4VPhysicalVolume* Brass_hole_phys[250][300];
@@ -148,31 +146,31 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   char name[60];
   for (int iF_X = 0; iF_X < NFIBERS_X; iF_X++)
   {
-    for (int iF_Y = 0; iF_Y < NFIBERS_Y; iF_Y++)
+    for (int iF_Z = 0; iF_Z < NFIBERS_Z; iF_Z++)
     {
-      sprintf(name,"Hole_x%03d_y%03d",iF_X,iF_Y);
-      Brass_hole_phys[iF_X][iF_Y] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Y],y[iF_X][iF_Y],0), Brass_hole_log, name, Box_abs_log, false, 0);
+      sprintf(name,"Hole_x%03d_z%03d",iF_X,iF_Z);
+      Brass_hole_phys[iF_X][iF_Z] = new G4PVPlacement(piRot, G4ThreeVector(x[iF_X][iF_Z],0,z[iF_X][iF_Z]), Brass_hole_log, name, Box_abs_log, false, 0);
       
-      sprintf(name,"Fiber_x%03d_y%03d",iF_X,iF_Y);
-      Crystal_phys[iF_X][iF_Y] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Y],y[iF_X][iF_Y],0), Crystal_fiber_log, name, Box_abs_log, false, 0);     
+      sprintf(name,"Fiber_x%03d_z%03d",iF_X,iF_Z);
+      Crystal_phys[iF_X][iF_Z] = new G4PVPlacement(piRot, G4ThreeVector(x[iF_X][iF_Z],0,z[iF_X][iF_Z]), Crystal_fiber_log, name, Box_abs_log, false, 0);     
       
-      sprintf(name,"Win_front_x%03d_y%03d",iF_X,iF_Y);
-      Win_front_phys[iF_X][iF_Y] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Y],y[iF_X][iF_Y],0.5*fiber_length+det_distance+0.5*win_l), Win_log, name, Box_abs_log, false, 0);
+      sprintf(name,"Win_front_x%03d_z%03d",iF_X,iF_Z);
+      Win_front_phys[iF_X][iF_Z] = new G4PVPlacement(piRot, G4ThreeVector(x[iF_X][iF_Z],0.5*fiber_length+det_distance+0.5*win_l,z[iF_X][iF_Z]), Win_log, name, expHall_log, false, 0);
       
-      sprintf(name,"Win_rear_x%03d_y%03d",iF_X,iF_Y);
-      Win_rear_phys[iF_X][iF_Y] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Y],y[iF_X][iF_Y],-0.5*fiber_length-det_distance-0.5*win_l), Win_log, name, Box_abs_log, false, 0);
+      sprintf(name,"Win_rear_x%03d_z%03d",iF_X,iF_Z);
+      Win_rear_phys[iF_X][iF_Z] = new G4PVPlacement(piRot, G4ThreeVector(x[iF_X][iF_Z],-0.5*fiber_length-det_distance-0.5*win_l,z[iF_X][iF_Z]), Win_log, name, expHall_log, false, 0);
       
-      sprintf(name,"Det_layer_front_x%03d_y%03d",iF_X,iF_Y);
-      Det_layer_front_phys[iF_X][iF_Y] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Y],y[iF_X][iF_Y],0.5*fiber_length+det_distance+win_l+0.5*depth), Det_layer_log, name, Box_abs_log, false, 0);
+      sprintf(name,"Det_layer_front_x%03d_z%03d",iF_X,iF_Z);
+      Det_layer_front_phys[iF_X][iF_Z] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Z],0.5*fiber_length+det_distance+win_l+0.5*depth,z[iF_X][iF_Z]), Det_layer_log, name, expHall_log, false, 0);
       
-      sprintf(name,"Det_layer_rear_x%03d_y%03d",iF_X,iF_Y);
-      Det_layer_rear_phys[iF_X][iF_Y] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Y],y[iF_X][iF_Y],0.5*fiber_length+det_distance+win_l+0.5*depth), Det_layer_log, name, Box_abs_log, false, 0);
+      sprintf(name,"Det_layer_rear_x%03d_z%03d",iF_X,iF_Z);
+      Det_layer_rear_phys[iF_X][iF_Z] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Z],-0.5*fiber_length-det_distance-win_l-0.5*depth,z[iF_X][iF_Z]), Det_layer_log, name, expHall_log, false, 0);
       
-      sprintf(name,"Det_front_x%03d_y%03d",iF_X,iF_Y);
-      Det_front_phys[iF_X][iF_Y] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Y],y[iF_X][iF_Y],0.5*fiber_length+det_distance+win_l+depth+0.5*(det_d-depth)), Det_log, name, Box_abs_log, false, 0);
+      sprintf(name,"Det_front_x%03d_z%03d",iF_X,iF_Z);
+      Det_front_phys[iF_X][iF_Z] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Z],0.5*fiber_length+det_distance+win_l+depth+0.5*(det_d-depth),z[iF_X][iF_Z]), Det_log, name, expHall_log, false, 0);
       
-      sprintf(name,"Det_rear_x%03d_y%03d",iF_X,iF_Y);
-      Det_rear_phys[iF_X][iF_Y] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Y],y[iF_X][iF_Y],0.5*fiber_length+det_distance+win_l+depth+0.5*(det_d-depth)), Det_log, name, Box_abs_log, false, 0);
+      sprintf(name,"Det_rear_x%03d_z%03d",iF_X,iF_Z);
+      Det_rear_phys[iF_X][iF_Z] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Z],-0.5*fiber_length-det_distance-win_l-depth-0.5*(det_d-depth),z[iF_X][iF_Z]), Det_log, name, expHall_log, false, 0);
     }
   }
   
@@ -214,6 +212,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   VisAttWindow->SetForceWireframe(false);
   Win_log->SetVisAttributes(VisAttWindow);
   
+  G4VisAttributes* VisAttDetLayer = new G4VisAttributes(red);
+  VisAttDetLayer->SetVisibility(true);
+  VisAttDetLayer->SetForceWireframe(false);
+  Det_layer_log->SetVisAttributes(VisAttDetLayer);
+  
   G4VisAttributes* VisAttDetector = new G4VisAttributes(gray);
   VisAttDetector->SetVisibility(true);
   VisAttDetector->SetForceWireframe(false);
@@ -225,7 +228,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
   
   
-  G4cout << ">>> DetectorConstruction::Construct()::endl <<< " << G4endl;
+  G4cout << ">>>>>> DetectorConstruction::Construct()::end <<< " << G4endl;
   return expHall_phys;
 }
 
@@ -248,9 +251,9 @@ void DetectorConstruction::readConfigFile(string configFileName)
   config.readInto(fiber_radius,"fiber_radius");
   config.readInto(fiber_length,"fiber_length");
   config.readInto(spacingX,"spacingX");
-  config.readInto(spacingY,"spacingY");
+  config.readInto(spacingZ,"spacingZ");
   config.readInto(NFIBERS_X,"NFIBERS_X");
-  config.readInto(NFIBERS_Y,"NFIBERS_Y");
+  config.readInto(NFIBERS_Z,"NFIBERS_Z");
   config.readInto(abs_material,"abs_material");
   
   config.readInto(win_r,"win_r");
@@ -276,13 +279,13 @@ void DetectorConstruction::readConfigFile(string configFileName)
     
     const int NFIBERS_X = config.read<int>("NFIBERS_X");
     G4cout << "NFIBERS_X: " << NFIBERS_X << G4endl;
-    const int NFIBERS_Y = config.read<int>("NFIBERS_Y");
-    G4cout << "NFIBERS_Y: " << NFIBERS_Y << G4endl;
+    const int NFIBERS_Z = config.read<int>("NFIBERS_Z");
+    G4cout << "NFIBERS_Z: " << NFIBERS_Z << G4endl;
     
     G4double spacingX = config.read<double>("spacingX")*mm;
     G4cout << "spacingX [mm]: " << spacingX << G4endl;
-    G4double spacingY = config.read<double>("spacingY")*mm;
-    G4cout << "spacingY [mm]: " << spacingY << G4endl;
+    G4double spacingZ = config.read<double>("spacingZ")*mm;
+    G4cout << "spacingZ [mm]: " << spacingZ << G4endl;
   */
 }
 

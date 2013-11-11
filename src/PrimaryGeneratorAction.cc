@@ -32,37 +32,27 @@
 
 #include "PrimaryGeneratorAction.hh"
 
-#include "Randomize.hh"
+//#include "Randomize.hh"
 
 #include "G4Event.hh"
 #include "G4ParticleGun.hh"
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4GeneralParticleSource.hh"
+
 #include "CreateTree.hh"
+
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-PrimaryGeneratorAction::PrimaryGeneratorAction()
+PrimaryGeneratorAction::PrimaryGeneratorAction(const G4ThreeVector& posCentre)
 {
-  G4int n_particle = 1;
-  particleGun = new G4ParticleGun(n_particle);
+  G4GeneralParticleSource* gps = new G4GeneralParticleSource();
   
-  /*
-    G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
-    G4String particleName;
-    particleGun->SetParticleDefinition(particleTable->FindParticle(particleName="neutron"));
-    particleGun->SetParticleEnergy(3.0*MeV);
-    particleGun->SetParticlePosition(G4ThreeVector(0,0,10.0*cm));
-  */
-  
-  G4GeneralParticleSource *gps = new G4GeneralParticleSource();
-   
   //gps->GetCurrentSource()->GetEneDist()->SetMonoEnergy(0.511*MeV);
-  //gps->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(0.0*cm, 1.2*cm, 0.0*cm));
-  //gps->GetCurrentSource()->SetParticlePosition(0.*mm,12.*mm,0.*mm);
   //gps->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(0.,-1.,0.));
+  gps->GetCurrentSource()->GetPosDist()->SetCentreCoords(posCentre);
   
   gun = gps;
 }
@@ -71,13 +61,12 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
 
 PrimaryGeneratorAction::~PrimaryGeneratorAction()
 {
-  delete particleGun;
+  delete gun;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
-  //particleGun->GeneratePrimaryVertex(anEvent);
   gun->GeneratePrimaryVertex(anEvent);
 }

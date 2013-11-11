@@ -1,35 +1,21 @@
 # Macro file for the 
 # initialization of G4GeneralParticleSource
 
-#
-#
-/gps/energy 10 eV
-/gps/particle e-
-#/gps/particle gamma
 
-# longitudinal beam
-#/gps/position 0.3 0. 0 m 
-
-#/gps/pos/type Beam
-#/gps/pos/shape Circle
-#/gps/pos/sigmar 4 cm
+/gps/energy 10 GeV
+/gps/particle gamma
 
 /gps/pos/type Plane
 /gps/pos/shape Square
 /gps/pos/halfx 0.5 cm
 /gps/pos/halfy 0.5 cm
-/gps/pos/centre 0. 0.0 2.5 m
-
-#/gps/direction 0. 0. 1.
 
 /gps/ang/type beam2d
 /gps/ang/focuspoint 0 0 1.50 m
 /gps/ang/sigma_x 0.5 mrad
 /gps/ang/sigma_y 0.5 mrad
 
+/gps/direction 0. 0. 1.
 
-#/gps/ang/rot1 0. 0. -1.5
-#/gps/pos/radius 2.2 cm
-
-
-/run/beamOn 10
+#/tracking/verbose 1
+/run/beamOn 100

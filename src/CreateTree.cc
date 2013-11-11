@@ -7,7 +7,7 @@ CreateTree* CreateTree::fInstance = NULL;
 
 
 
-CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos_fiber, bool timing)
+CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos_fiber, bool opPhotons, bool timing)
 {
   if( fInstance )
   {
@@ -17,6 +17,7 @@ CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos
   this -> ENERGY_FIBER 	= energy_fiber;
   this -> INIT_DATA    	= init_data;
   this -> POS_FIBER    	= pos_fiber;
+  this -> OPPHOTONS     = opPhotons;
   this -> TIMING        = timing;
   
   this -> fInstance = this;
@@ -55,14 +56,14 @@ CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos
     this->GetTree()->Branch("Total_nonion_energy",&this->Total_nonion_energy,"Total_nonion_energy[250][300]/F");	  
   }
   
-  if( this -> TIMING)
+  if( this -> OPPHOTONS)
   {
     this->GetTree()->Branch("opPhoton_n",&this->opPhoton_n,"opPhoton_n/I");
     this->GetTree()->Branch("opPhoton_process",&opPhoton_process);
     this->GetTree()->Branch("opPhoton_trackID",&opPhoton_trackID);
     this->GetTree()->Branch("opPhoton_parentTrackID",&opPhoton_parentTrackID);
     this->GetTree()->Branch("opPhoton_fiberIX",&opPhoton_fiberIX);
-    this->GetTree()->Branch("opPhoton_fiberIY",&opPhoton_fiberIY);
+    this->GetTree()->Branch("opPhoton_fiberIZ",&opPhoton_fiberIZ);
     this->GetTree()->Branch("opPhoton_energy",&opPhoton_energy);
     this->GetTree()->Branch("opPhoton_waveLength",&opPhoton_waveLength);
     this->GetTree()->Branch("opPhoton_time",&opPhoton_time);
@@ -78,7 +79,7 @@ CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos
     this->GetTree()->Branch("opPhoton_trackID_det",&opPhoton_trackID_det);
     this->GetTree()->Branch("opPhoton_parentTrackID_det",&opPhoton_parentTrackID_det);
     this->GetTree()->Branch("opPhoton_fiberIX_det",&opPhoton_fiberIX_det);
-    this->GetTree()->Branch("opPhoton_fiberIY_det",&opPhoton_fiberIY_det);
+    this->GetTree()->Branch("opPhoton_fiberIZ_det",&opPhoton_fiberIZ_det);
     this->GetTree()->Branch("opPhoton_energy_det",&opPhoton_energy_det);
     this->GetTree()->Branch("opPhoton_waveLength_det",&opPhoton_waveLength_det);
     this->GetTree()->Branch("opPhoton_time_det",&opPhoton_time_det);
@@ -131,10 +132,10 @@ void CreateTree::Clear()
   {
     for (int iF_X = 0; iF_X < 250; iF_X++)
     {
-      for (int iF_Y = 0; iF_Y < 300; iF_Y++)
+      for (int iF_Z = 0; iF_Z < 300; iF_Z++)
       {
-        Total_energy[iF_X][iF_Y] = 0;
-        Total_nonion_energy[iF_X][iF_Y] = 0;	  		    	  
+        Total_energy[iF_X][iF_Z] = 0;
+        Total_nonion_energy[iF_X][iF_Z] = 0;	  		    	  
       }
     }
   }
@@ -147,14 +148,14 @@ void CreateTree::Clear()
     Energy_deposited.clear();
   }
   
-  if( this->TIMING )
+  if( this->OPPHOTONS )
   {
     opPhoton_n = 0;
     opPhoton_process.clear();
     opPhoton_trackID.clear();
     opPhoton_parentTrackID.clear();
     opPhoton_fiberIX.clear();
-    opPhoton_fiberIY.clear();
+    opPhoton_fiberIZ.clear();
     opPhoton_energy.clear();
     opPhoton_waveLength.clear();
     opPhoton_time.clear();
@@ -170,7 +171,7 @@ void CreateTree::Clear()
     opPhoton_trackID_det.clear();
     opPhoton_parentTrackID_det.clear();
     opPhoton_fiberIX_det.clear();
-    opPhoton_fiberIY_det.clear();
+    opPhoton_fiberIZ_det.clear();
     opPhoton_energy_det.clear();
     opPhoton_waveLength_det.clear();
     opPhoton_time_det.clear();

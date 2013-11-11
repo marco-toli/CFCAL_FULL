@@ -58,6 +58,10 @@ public:
   DetectorConstruction(const string& configFileName);
   ~DetectorConstruction();
   
+  G4double GetAbsorber_x() const { return absorber_x; };
+  G4double GetAbsorber_y() const { return absorber_y; };
+  G4double GetAbsorber_z() const { return absorber_z; };
+  
 public:
   G4VPhysicalVolume* Construct();
   
@@ -74,8 +78,8 @@ private:
   
   G4double fiber_length;
   G4double fiber_radius;
-  int NFIBERS_X, NFIBERS_Y;
-  G4double spacingX, spacingY;
+  int NFIBERS_X, NFIBERS_Z;
+  G4double spacingX, spacingZ;
   
   G4double absorber_x;
   G4double absorber_y;

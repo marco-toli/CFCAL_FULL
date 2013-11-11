@@ -5,8 +5,8 @@
 
 # Disable auto refresh and quieten vis messages whilst scene and
 # trajectories are established:
-/vis/viewer/set/autoRefresh false
-/vis/verbose errors
+#/vis/viewer/set/autoRefresh false
+#/vis/verbose errors
 
 
 # Draw geometry:
@@ -16,14 +16,14 @@
 /vis/viewer/set/viewpointThetaPhi 270 0 deg
 
 # Specify zoom value:
-/vis/viewer/zoomTo 10
+/vis/viewer/zoomTo 5
 
 # Specify style (surface or wireframe):
 #/vis/viewer/set/style wireframe
 /vis/viewer/set/style surface
 
 # Draw coordinate axes:
-#/vis/scene/add/axes 0 0 0 1 cm
+/vis/scene/add/axes 0 0 0 1 m
 
 
 # Draw smooth trajectories at end of event, showing trajectory points
@@ -39,9 +39,10 @@
 #
 # To draw only gammas:
 /vis/filtering/trajectories/create/particleFilter
-/vis/filtering/trajectories/particleFilter-0/add opticalphoton
 /vis/filtering/trajectories/particleFilter-0/add pi-
 /vis/filtering/trajectories/particleFilter-0/add e-
+/vis/filtering/trajectories/particleFilter-0/add gamma
+/vis/filtering/trajectories/particleFilter-0/add opticalphoton
 #
 # To invert the above, drawing all particles except gammas,
 # keep the above two lines but also add:
@@ -71,26 +72,19 @@
 
 
 /gps/energy 10 GeV
-/gps/particle pi-
+/gps/particle gamma
 
 /gps/pos/type Plane
 /gps/pos/shape Square
-/gps/pos/halfx 0.0005 cm
-/gps/pos/halfy 0.0005 cm
-/gps/pos/centre 0. 0.0 2.5 m
-#/gps/pos/centre 0. 0.0 0 m
+/gps/pos/halfx 0.5 cm
+/gps/pos/halfy 0.5 cm
 
 /gps/ang/type beam2d
-/gps/ang/focuspoint 0 0 1.50 m
-/gps/ang/sigma_x 0.5 mrad
-/gps/ang/sigma_y 0.5 mrad
+/gps/ang/focuspoint 0 0 -1.50 m
+/gps/ang/sigma_x 0.05 mrad
+/gps/ang/sigma_y 0.05 mrad
 
-/gps/ang/mintheta 1.57
-/gps/ang/maxtheta 1.57
+#/gps/direction 0. 0. 1.
 
-/gps/ang/minphi 1.57
-/gps/ang/maxphi 1.57
-
-
-/tracking/verbose 1
+#/tracking/verbose 1
 /run/beamOn 1

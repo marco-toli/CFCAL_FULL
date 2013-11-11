@@ -19,11 +19,12 @@ public:
   bool ENERGY_FIBER;
   bool INIT_DATA; 
   bool POS_FIBER;
+  bool OPPHOTONS;
   bool TIMING;
   
 public:
   
-  CreateTree(TString name, bool energy_fiber, bool init_data, bool pos_fiber, bool timing);
+  CreateTree(TString name, bool energy_fiber, bool init_data, bool pos_fiber, bool opPhotons, bool timing);
   ~CreateTree();
   
   TTree*             GetTree() const { return ftree; };
@@ -37,6 +38,7 @@ public:
   bool Energy_fiber() const { return this -> ENERGY_FIBER; };
   bool Init_data()    const { return this -> INIT_DATA;    };
   bool Pos_fiber()    const { return this -> POS_FIBER;    };
+  bool OpPhotons()    const { return this -> OPPHOTONS;    };
   bool Timing()       const { return this -> TIMING;       };
   
   int Event;
@@ -67,7 +69,7 @@ public:
   std::vector<int> opPhoton_trackID;
   std::vector<int> opPhoton_parentTrackID;
   std::vector<int> opPhoton_fiberIX;
-  std::vector<int> opPhoton_fiberIY;
+  std::vector<int> opPhoton_fiberIZ;
   std::vector<float> opPhoton_energy;
   std::vector<float> opPhoton_waveLength;
   std::vector<float> opPhoton_time;
@@ -83,7 +85,7 @@ public:
   std::vector<int> opPhoton_trackID_det;
   std::vector<int> opPhoton_parentTrackID_det;
   std::vector<int> opPhoton_fiberIX_det;
-  std::vector<int> opPhoton_fiberIY_det;
+  std::vector<int> opPhoton_fiberIZ_det;
   std::vector<float> opPhoton_energy_det;
   std::vector<float> opPhoton_waveLength_det;
   std::vector<float> opPhoton_time_det;

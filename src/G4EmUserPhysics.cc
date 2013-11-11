@@ -117,12 +117,12 @@ void G4EmUserPhysics::ConstructProcess()
       pmanager->SetProcessOrdering(theCerenkovProcess,idxPostStep);
     }
     
-    if (theScintillationProcess->IsApplicable(*particle))
-    {
-      pmanager->AddProcess(theScintillationProcess);
-      pmanager->SetProcessOrderingToLast(theScintillationProcess, idxAtRest);
-      pmanager->SetProcessOrderingToLast(theScintillationProcess, idxPostStep);
-    }
+    //if (theScintillationProcess->IsApplicable(*particle))
+    //{
+    //  pmanager->AddProcess(theScintillationProcess);
+    //  pmanager->SetProcessOrderingToLast(theScintillationProcess, idxAtRest);
+    //  pmanager->SetProcessOrderingToLast(theScintillationProcess, idxPostStep);
+    //}
     
     if (particleName == "opticalphoton")
     {
