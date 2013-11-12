@@ -61,7 +61,7 @@ DetectorConstruction::DetectorConstruction(const string& configFileName)
   
   initializeMaterials();
   
-  expHall_x = expHall_y = expHall_z = 3*m;
+  expHall_x = expHall_y = expHall_z = 10*m;
   
   brass_hole_radius = fiber_radius + 0.1*mm;
   

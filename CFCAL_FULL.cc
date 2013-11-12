@@ -64,6 +64,7 @@
 #include "PrimaryGeneratorAction.hh"
 #include "DetectorConstruction.hh"
 #include "RunAction.hh"
+#include "TrackingAction.hh"
 #include "SteppingAction.hh"
 #include "EventAction.hh"
 #include "SteppingVerbose.hh"
@@ -200,7 +201,7 @@ int main(int argc,char** argv)
   G4cout << ">>> Define DetectorConstruction::end <<<" << G4endl; 
   
   G4cout << ">>> Define PrimaryGeneratorAction::begin <<<" << G4endl; 
-  G4ThreeVector posCentre(0.*m,0.*m,-1.1*(detector->GetAbsorber_z()/m)/2.*m);
+  G4ThreeVector posCentre(0.*m,0.*m,-1.*(detector->GetAbsorber_z()/m)/2.*m);
   G4VUserPrimaryGeneratorAction* gen_action = new PrimaryGeneratorAction(posCentre);
   runManager->SetUserAction(gen_action);
   G4cout << ">>> Define PrimaryGeneratorAction::end <<<" << G4endl; 
@@ -218,10 +219,15 @@ int main(int argc,char** argv)
   runManager->SetUserAction(event_action);
   G4cout << ">>> Define EventAction::end <<<" << G4endl; 
   
+  G4cout << ">>> Define TrackingAction::begin <<<" << G4endl; 
+  TrackingAction* tracking_action = new TrackingAction;
+  runManager->SetUserAction(tracking_action); 
+  G4cout << ">>> Define TrackingAction::end <<<" << G4endl;
+  
   G4cout << ">>> Define SteppingAction::begin <<<" << G4endl; 
   SteppingAction* stepping_action = new SteppingAction;
   runManager->SetUserAction(stepping_action); 
-  G4cout << ">>> Define SteppingAction::end <<<" << G4endl;  
+  G4cout << ">>> Define SteppingAction::end <<<" << G4endl;
   
   
   if (argc == 2)   // Define UI session for interactive mode

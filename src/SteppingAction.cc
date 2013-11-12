@@ -153,11 +153,40 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
     G4String thePrePVLogName = thePrePVLog -> GetName();
     
     
-    Float_t energy = theStep->GetTotalEnergyDeposit()/GeV;
-    Float_t nonion_energy = theStep->GetNonIonizingEnergyDeposit()/GeV;
+    float delta = thePrePoint->GetTotalEnergy()/GeV - thePostPoint->GetTotalEnergy()/GeV;
+    float energy = theStep->GetTotalEnergyDeposit()/GeV;
+    float ion_energy = theStep->GetTotalEnergyDeposit()/GeV - theStep->GetNonIonizingEnergyDeposit()/GeV;
+    float nonion_energy = theStep->GetNonIonizingEnergyDeposit()/GeV;
     
-    if (energy > 0)
+    if( delta > 0 )
     {	
+      CreateTree::Instance()->Total_delta_world         += delta;
+      CreateTree::Instance()->Total_energy_world        += energy;
+      CreateTree::Instance()->Total_ion_energy_world    += ion_energy;
+      CreateTree::Instance()->Total_nonion_energy_world += nonion_energy;
+      
+      if( thePrePVName == "Box_abs_phys" || thePrePVLogName == "Crystal_fiber_log" )
+      {
+        CreateTree::Instance()->Total_delta_absorber         += delta;
+        CreateTree::Instance()->Total_energy_absorber        += energy;
+        CreateTree::Instance()->Total_ion_energy_absorber    += ion_energy;
+        CreateTree::Instance()->Total_nonion_energy_absorber += nonion_energy;
+      }
+      
+      if( thePrePVLogName == "Crystal_fiber_log" )
+      {
+        CreateTree::Instance()->Total_delta_fibers         += delta;
+        CreateTree::Instance()->Total_energy_fibers        += energy;
+        CreateTree::Instance()->Total_ion_energy_fibers    += ion_energy;
+        CreateTree::Instance()->Total_nonion_energy_fibers += nonion_energy;
+      
+        if( CreateTree::Instance()->Energy_fiber() )
+        {
+          CreateTree::Instance()->Total_energy[iF_X][iF_Z] += energy;	
+          CreateTree::Instance()->Total_nonion_energy[iF_X][iF_Z] += nonion_energy;	               
+        }
+      }
+      
       if( CreateTree::Instance()->Pos_fiber() )
       {
         G4ThreeVector pos = thePostPoint -> GetPosition();	
@@ -166,24 +195,6 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
         CreateTree::Instance() -> depositionZ.push_back(pos[2]);
         CreateTree::Instance() -> Energy_deposited.push_back(energy);
       }
-      
-      if( thePrePVName == "Box_abs_phys" || thePrePVLogName == "Crystal_fiber_log" )
-        CreateTree::Instance()->Total_energy_absorber += energy;
-      
-      if( thePrePVLogName == "Crystal_fiber_log" )
-      {
-        CreateTree::Instance()->Total_energy_fibers += energy;
-        CreateTree::Instance()->Total_nonion_energy_fibers += nonion_energy;
-        
-        if( CreateTree::Instance()->Energy_fiber() )
-        {
-          CreateTree::Instance()->Total_energy[iF_X][iF_Z] += energy;	
-          CreateTree::Instance()->Total_nonion_energy[iF_X][iF_Z] += nonion_energy;	               
-        }
-      }
-      
-      CreateTree::Instance()->Total_energy_world += energy;       
     }  
   } // non optical photon
-  
 }

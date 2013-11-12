@@ -43,16 +43,19 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
   
   if(CreateTree::Instance() -> Init_data())
   {
+    G4double InitEnergy   = evt -> GetPrimaryVertex() -> GetPrimary() -> GetTotalEnergy();
     G4ThreeVector InitPos = evt -> GetPrimaryVertex() -> GetPosition();
     G4ThreeVector InitDir = evt -> GetPrimaryVertex() -> GetPrimary() -> GetMomentumDirection();
-
-    CreateTree::Instance() -> InitialPositionX = InitPos[0];		
-    CreateTree::Instance() -> InitialPositionY = InitPos[1];		
+    
+    CreateTree::Instance() -> InitialEnergy = InitEnergy;
+    
+    CreateTree::Instance() -> InitialPositionX = InitPos[0];
+    CreateTree::Instance() -> InitialPositionY = InitPos[1];
     CreateTree::Instance() -> InitialPositionZ = InitPos[2];
-  	
-    CreateTree::Instance() -> InitalMomentumDirectionX = InitDir[0];		
-    CreateTree::Instance() -> InitalMomentumDirectionY = InitDir[1];		
-    CreateTree::Instance() -> InitalMomentumDirectionZ = InitDir[2];	
+    
+    CreateTree::Instance() -> InitalMomentumDirectionX = InitDir[0];
+    CreateTree::Instance() -> InitalMomentumDirectionY = InitDir[1];
+    CreateTree::Instance() -> InitalMomentumDirectionZ = InitDir[2];
   }
     
   // -------------------- INSTANCE RUN/EVENT IN TREE ---------------------- //
@@ -62,10 +65,5 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
 void EventAction::EndOfEventAction(const G4Event* evt)
 { 
   CreateTree::Instance()->Fill();
-  //if (CreateTree::Instance()-> Total_energy[0] > 8)
-  //{
-      
-  //}
-  
 }
 

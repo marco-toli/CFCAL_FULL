@@ -40,9 +40,9 @@
 # To draw only gammas:
 /vis/filtering/trajectories/create/particleFilter
 /vis/filtering/trajectories/particleFilter-0/add pi-
-/vis/filtering/trajectories/particleFilter-0/add e-
-/vis/filtering/trajectories/particleFilter-0/add gamma
-/vis/filtering/trajectories/particleFilter-0/add opticalphoton
+#/vis/filtering/trajectories/particleFilter-0/add e-
+#/vis/filtering/trajectories/particleFilter-0/add gamma
+#/vis/filtering/trajectories/particleFilter-0/add opticalphoton
 #
 # To invert the above, drawing all particles except gammas,
 # keep the above two lines but also add:
@@ -72,7 +72,7 @@
 
 
 /gps/energy 10 GeV
-/gps/particle gamma
+/gps/particle pi-
 
 /gps/pos/type Plane
 /gps/pos/shape Square
@@ -84,7 +84,7 @@
 /gps/ang/sigma_x 0.05 mrad
 /gps/ang/sigma_y 0.05 mrad
 
-#/gps/direction 0. 0. 1.
+/gps/direction 0. 0. 1.
 
 #/tracking/verbose 1
 /run/beamOn 1

@@ -1,4 +1,3 @@
-
 #include "CreateTree.hh"
 
 
@@ -26,13 +25,27 @@ CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos
   
   this->GetTree()->Branch("Event",&this->Event,"Event/I");
   
-  this->GetTree()->Branch("Total_energy_fibers",&this->Total_energy_fibers,"Total_energy_fibers/F");
+  this->GetTree()->Branch("Total_delta_fibers",        &this->Total_delta_fibers,        "Total_delta_fibers/F");
+  this->GetTree()->Branch("Total_energy_fibers",       &this->Total_energy_fibers,       "Total_energy_fibers/F");
+  this->GetTree()->Branch("Total_ion_energy_fibers",   &this->Total_ion_energy_fibers,   "Total_ion_energy_fibers/F");
   this->GetTree()->Branch("Total_nonion_energy_fibers",&this->Total_nonion_energy_fibers,"Total_nonion_energy_fibers/F");
-  this->GetTree()->Branch("Total_energy_absorber",&this->Total_energy_absorber,"Total_energy_absorber/F");
-  this->GetTree()->Branch("Total_energy_world",&this->Total_energy_world,"Total_energy_world/F");
+  
+  this->GetTree()->Branch("Total_delta_absorber",        &this->Total_delta_absorber,        "Total_delta_absorber/F");
+  this->GetTree()->Branch("Total_energy_absorber",       &this->Total_energy_absorber,       "Total_energy_absorber/F");
+  this->GetTree()->Branch("Total_ion_energy_absorber",   &this->Total_ion_energy_absorber,   "Total_ion_energy_absorber/F");
+  this->GetTree()->Branch("Total_nonion_energy_absorber",&this->Total_nonion_energy_absorber,"Total_nonion_energy_absorber/F");
+  
+  this->GetTree()->Branch("Total_delta_world",        &this->Total_delta_world,        "Total_delta_world/F");
+  this->GetTree()->Branch("Total_energy_world",       &this->Total_energy_world,       "Total_energy_world/F");
+  this->GetTree()->Branch("Total_ion_energy_world",   &this->Total_ion_energy_world,   "Total_ion_energy_world/F");
+  this->GetTree()->Branch("Total_nonion_energy_world",&this->Total_nonion_energy_world,"Total_nonion_energy_world/F");
+  
+  this->GetTree()->Branch("Total_em_energy",&this->Total_em_energy,"Total_em_energy/F");
   
   if( this -> INIT_DATA )
   {
+    this->GetTree()->Branch("InitialEnergy",&this->InitialEnergy,"InitialEnergy/F");
+    
     this->GetTree()->Branch("InitialPositionX",&this->InitialPositionX,"InitialPositionX/F");
     this->GetTree()->Branch("InitialPositionY",&this->InitialPositionY,"InitialPositionY/F");
     this->GetTree()->Branch("InitialPositionZ",&this->InitialPositionZ,"InitialPositionZ/F");
@@ -112,13 +125,27 @@ void CreateTree::Clear()
 {
   Event	= 0;
   
+  Total_delta_fibers         = 0;
   Total_energy_fibers        = 0;
+  Total_ion_energy_fibers    = 0;
   Total_nonion_energy_fibers = 0;
-  Total_energy_absorber      = 0;
-  Total_energy_world         = 0;
+  
+  Total_delta_absorber         = 0;
+  Total_energy_absorber        = 0;
+  Total_ion_energy_absorber    = 0;
+  Total_nonion_energy_absorber = 0;
+  
+  Total_delta_world         = 0;
+  Total_energy_world        = 0;
+  Total_ion_energy_world    = 0;
+  Total_nonion_energy_world = 0;
+  
+  Total_em_energy = 0;
   
   if( this->INIT_DATA )
   {
+    InitialEnergy = 0;
+    
     InitialPositionX = 0;
     InitialPositionY = 0;
     InitialPositionZ = 0;

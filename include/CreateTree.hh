@@ -43,6 +43,8 @@ public:
   
   int Event;
   
+  float InitialEnergy;
+  
   float InitialPositionX;
   float InitialPositionY;
   float InitialPositionZ;
@@ -56,10 +58,22 @@ public:
   std::vector<float> depositionY;
   std::vector<float> depositionZ;
   
+  float Total_delta_fibers;
   float Total_energy_fibers;
-  float Total_nonion_energy_fibers;  
+  float Total_ion_energy_fibers;
+  float Total_nonion_energy_fibers;
+  
+  float Total_delta_absorber;
   float Total_energy_absorber;
+  float Total_ion_energy_absorber;
+  float Total_nonion_energy_absorber;
+  
+  float Total_delta_world;
   float Total_energy_world;
+  float Total_ion_energy_world;
+  float Total_nonion_energy_world;
+  
+  float Total_em_energy;
   
   float Total_energy[250][300];
   float Total_nonion_energy[250][300];
