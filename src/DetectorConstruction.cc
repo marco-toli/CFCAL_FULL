@@ -314,6 +314,8 @@ void DetectorConstruction::initializeMaterials()
   else if( crystal_material == 5 ) ScMaterial = MyMaterials::PWO();
   else if( crystal_material == 6 ) ScMaterial = MyMaterials::Air();
   else if( crystal_material == 7 ) ScMaterial = MyMaterials::Quartz();
+  else if( crystal_material == 8 ) ScMaterial = MyMaterials::DSBCe();
+  else if( crystal_material == 9 ) ScMaterial = MyMaterials::SiO2Ce();
   else
   {
     G4cerr << "<DetectorConstructioninitializeMaterials>: Invalid crystal material specifier " << crystal_material << G4endl;
