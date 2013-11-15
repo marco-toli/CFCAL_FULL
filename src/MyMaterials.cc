@@ -232,6 +232,52 @@ G4Material* MyMaterials::Quartz()
   return mat;
 }
 
+G4Material* MyMaterials::SiO2Ce()
+{
+  G4double a, z, density;
+
+  G4Element* Si = new G4Element("Silicon", "Si", z = 14., a = 28.09* g/mole);
+  G4Element* O  = new G4Element("Oxygen",  "O",  z =  8., a = 16.00* g/mole);
+
+  G4Material* mat = new G4Material ("SiO2Ce", density = 2.65*g/cm3,2);
+  mat->AddElement(Si,1);
+  mat->AddElement(O,2);
+
+  const G4int nEntries_RI = 11;
+  G4double PhotonEnergy_RI[nEntries_RI] =
+    { 1.0 * eV, 2.0 * eV, 2.5 * eV, 3.0 * eV,
+      3.5 * eV, 4.0 * eV, 4.5 * eV, 5.0 * eV,
+      5.5 * eV, 6.0 * eV, 6.26 * eV };
+  G4double RefractiveIndex[nEntries_RI] =
+    { 1.53, 1.54, 1.55, 1.56,
+      1.56, 1.57, 1.59, 1.60,
+      1.62, 1.64, 1.65 };
+
+  const G4int nEntries_ABS = 4;
+  G4double PhotonEnergy_ABS[nEntries_ABS] =
+    { 1.0 * eV, 1.84 * eV, 4.08 * eV, 6.26 * eV };
+  G4double Absorption[nEntries_ABS] =
+    { 138.*mm, 138.*mm, 138.*mm, 138. *mm };
+
+  const G4int NUMENTRIES_1 = 5;
+  G4double FAST_Energy[NUMENTRIES_1]    = {1.8*eV,1.90*eV,2.7*eV,2.88*eV,4.08*eV};
+  G4double FAST_COMPONENT[NUMENTRIES_1] = {0.00,1.00,2.0,1.0,0.00};
+
+  G4MaterialPropertiesTable* mt = new G4MaterialPropertiesTable();
+  mt->AddProperty ("RINDEX",    PhotonEnergy_RI,  RefractiveIndex, nEntries_RI);
+  mt->AddProperty ("ABSLENGTH", PhotonEnergy_ABS, Absorption,      nEntries_ABS);
+  mt->AddProperty("FASTCOMPONENT", FAST_Energy, FAST_COMPONENT, NUMENTRIES_1);
+
+  mt->AddConstProperty("SCINTILLATIONYIELD",1800/MeV);
+  mt->AddConstProperty("RESOLUTIONSCALE",8.5);
+  mt->AddConstProperty("FASTTIMECONSTANT",50.*ns);
+  mt->AddConstProperty("YIELDRATIO",1.0);
+  mt->AddConstProperty("FASTSCINTILLATIONRISETIME",0.5*ns);
+
+  mat->SetMaterialPropertiesTable(mt);
+  return mat;
+}
+
 
 
 G4Material* MyMaterials::Brass()
@@ -244,22 +290,6 @@ G4Material* MyMaterials::Brass()
   G4Material* mat = new G4Material("Brass", density=8.73*g/cm3,2);
   mat->AddElement(Cu,0.75);
   mat->AddElement(Zn,0.25);
-  
-  /*
-    const G4int nEntries = 4;
-    G4double PhotonEnergy[nEntries] =
-    { 0.0001*eV, 1.0*eV, 1.84*eV, 4.08*eV };
-    G4double RefractiveIndex[nEntries] =
-    { 4.0, 4.0, 4.0, 4.0 };
-    G4double Absorption[nEntries] =
-    { 0.1*mm, 0.1*mm, 0.1*mm, 0.1*mm};
-    
-    G4MaterialPropertiesTable* myMPT = new G4MaterialPropertiesTable();
-    myMPT->AddProperty("RINDEX",    PhotonEnergy,  RefractiveIndex, nEntries);
-    mtMPT->AddProperty("ABSLENGTH", PhotonEnergy,  Absorption,      nEntries);
-    
-    mat->SetMaterialPropertiesTable(myMPT);
-  */
   
   return mat;
 }
@@ -354,8 +384,6 @@ G4Material* MyMaterials::DSBCe()  // Nanostructured glass ceramics scintillator 
   mt->AddConstProperty("FASTSCINTILLATIONRISETIME",0.5*ns);
 
   mat->SetMaterialPropertiesTable(mt);
-
-
   return mat;
 }
 
