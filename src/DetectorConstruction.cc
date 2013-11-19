@@ -299,6 +299,7 @@ void DetectorConstruction::initializeMaterials()
   
   AbMaterial = NULL;
   if( abs_material == 1 ) AbMaterial = MyMaterials::Brass();
+  if( abs_material == 2 ) AbMaterial = MyMaterials::Tungsten();
   else
   {
     G4cerr << "<DetectorConstructioninitializeMaterials>: Invalid absorber material specifier " << abs_material << G4endl;
