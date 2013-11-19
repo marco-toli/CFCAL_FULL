@@ -69,6 +69,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
   if( particleType == G4OpticalPhoton::OpticalPhotonDefinition() && thePrePoint->GetGlobalTime()/ns < 10 )
   { 
     G4String processName = theTrack->GetCreatorProcess()->GetProcessName();
+    if (processName == "Cerenkov") CreateTree::Instance()->Tot_phot_cer += 1;
     
     if( (CreateTree::Instance()->TIMING && processName != "Cerenkov") ||
         (!CreateTree::Instance()->TIMING) )
