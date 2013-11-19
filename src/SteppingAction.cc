@@ -66,7 +66,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
   
   
   // optical photon
-  if( particleType == G4OpticalPhoton::OpticalPhotonDefinition() && thePrePoint->GetGlobalTime()/ns < 10 )
+  if( particleType == G4OpticalPhoton::OpticalPhotonDefinition() )
   { 
     G4String processName = theTrack->GetCreatorProcess()->GetProcessName();
     if (processName == "Cerenkov") CreateTree::Instance()->Tot_phot_cer += 1;
@@ -74,8 +74,10 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
     if( (CreateTree::Instance()->TIMING && processName != "Cerenkov") ||
         (!CreateTree::Instance()->TIMING) )
     theTrack->SetTrackStatus(fKillTrackAndSecondaries);
+
+    if (CreateTree::Instance()->OPPHOTONS)	{	// do this cycle only IF info on optical photons is needed
     
-    
+    cout << " ciclo timing?" << endl;
     //---------------------------------------------------------
     // storing time, energy and position of all optical photons
     
@@ -142,6 +144,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
       CreateTree::Instance()->opPhoton_waveLength_det.push_back( MyMaterials::fromEvToNm(theTrack->GetTotalEnergy()/eV) );
       CreateTree::Instance()->opPhoton_time_det.push_back( theTrack->GetGlobalTime()/picosecond );
     }
+   }	// opphotons needed
   }
   
   
