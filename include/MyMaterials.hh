@@ -19,6 +19,7 @@ public:
   static G4Material* Water();
   static G4Material* Silicon();
   static G4Material* Brass();
+  static G4Material* Tungsten();
   static G4Material* Quartz();
   static G4Material* OpticalGrease();
   static G4Material* LSO();
