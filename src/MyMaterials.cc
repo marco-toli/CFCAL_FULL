@@ -1,4 +1,5 @@
 #include "MyMaterials.hh"
+#include "G4NistManager.hh"
 
 
 
@@ -203,7 +204,7 @@ G4Material* MyMaterials::Quartz()
   G4Element* Si = new G4Element("Silicon", "Si", z = 14., a = 28.09* g/mole);
   G4Element* O  = new G4Element("Oxygen",  "O",  z =  8., a = 16.00* g/mole);
   
-  G4Material* mat = new G4Material ("Quartz", density = 2.65*g/cm3,2);
+  G4Material* mat = new G4Material ("Quartz", density = 2.2*g/cm3,2);
   mat->AddElement(Si,1);
   mat->AddElement(O,2);
   
@@ -270,7 +271,7 @@ G4Material* MyMaterials::SiO2Ce()
 
   mt->AddConstProperty("SCINTILLATIONYIELD",1800/MeV);
   mt->AddConstProperty("RESOLUTIONSCALE",8.5);
-  mt->AddConstProperty("FASTTIMECONSTANT",50.*ns);
+  mt->AddConstProperty("FASTTIMECONSTANT",55.*ns);
   mt->AddConstProperty("YIELDRATIO",1.0);
   mt->AddConstProperty("FASTSCINTILLATIONRISETIME",0.5*ns);
 
@@ -294,6 +295,23 @@ G4Material* MyMaterials::Brass()
   return mat;
 }
 
+
+G4Material* MyMaterials::Tungsten()
+{
+  //   G4Element* Cu = new G4Element("Copper", "Cu", z=29., a=63.546*g/mole);
+  G4NistManager* man = G4NistManager::Instance();
+  G4Element* W = man->FindOrBuildElement("W");
+  G4Element* Ni = man->FindOrBuildElement("Ni");
+  G4Element* Cu = man->FindOrBuildElement("Cu");
+
+  G4Material* mat = new G4Material("Tungsten", 17.*g/cm3,3);
+  mat->AddElement(W,90.*perCent);
+  mat->AddElement(Ni,5.*perCent);
+  mat->AddElement(Cu,5.*perCent);
+  return mat;
+}
+
+  
 
 
 G4Material* MyMaterials::OpticalGrease()
@@ -329,16 +347,7 @@ G4Material* MyMaterials::OpticalGrease()
       1.50, 1.50, 1.50, 1.50,
       1.50, 1.50, 1.50, 1.50,
       1.50, 1.50 };
-  //G4double Absorption[nEntries] =
-  //  {  3.448*m,  3.448*m,  4.082*m,  6.329*m,
-  //     9.174*m, 12.346*m, 13.889*m, 15.152*m,
-  //    17.241*m, 18.868*m, 20.000*m, 26.316*m,
-  //    35.714*m, 45.455*m, 47.619*m, 52.632*m,
-  //    52.632*m, 55.556*m, 52.632*m, 52.632*m,
-  //    47.619*m, 45.455*m, 41.667*m, 37.037*m,
-  //    33.333*m, 30.000*m, 28.500*m, 27.000*m,
-  //    24.500*m, 22.000*m, 19.500*m, 17.500*m,
-  //    14.500*m, xx.xxx*m };
+
   
   G4MaterialPropertiesTable* myMPT = new G4MaterialPropertiesTable();
   myMPT->AddProperty("RINDEX",    PhotonEnergy, RefractiveIndex, nEntries);
@@ -501,7 +510,7 @@ G4Material* MyMaterials::LuAG_Ce() // Lutetium Aluminum Garnet - Ce-doped
   G4double PhotonEnergy_RI[nEntries_RI] =
     { 1.0*eV, 1.84*eV, 4.08*eV };
   G4double RefractiveIndex[nEntries_RI] =
-    { 1.82, 1.82, 1.82 };
+    { 1.842, 1.842, 1.842 };
   //G4double Rayleigh[nEntries_RI] =
   //  { 138.*mm, 138.*mm, 138.*mm };
   
@@ -584,7 +593,7 @@ G4Material* MyMaterials::LuAG_Pr() // Lutetium Aluminum Garnet -
   G4double PhotonEnergy_RI[nEntries_RI] =
     { 1.0*eV, 1.84*eV, 4.08*eV };
   G4double RefractiveIndex[nEntries_RI] =
-    { 1.82, 1.82, 1.82 };
+    { 1.842, 1.842, 1.842 };
   //G4double Rayleigh[nEntries_RI] =
   //  { 138.*mm, 138.*mm, 138.*mm};
   
