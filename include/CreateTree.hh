@@ -67,6 +67,7 @@ public:
   float Total_energy_absorber;
   float Total_ion_energy_absorber;
   float Total_nonion_energy_absorber;
+  float Tot_phot_cer;
   
   float Total_delta_world;
   float Total_energy_world;
