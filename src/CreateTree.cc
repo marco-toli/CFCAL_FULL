@@ -33,7 +33,8 @@ CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos
   this->GetTree()->Branch("Total_delta_absorber",        &this->Total_delta_absorber,        "Total_delta_absorber/F");
   this->GetTree()->Branch("Total_energy_absorber",       &this->Total_energy_absorber,       "Total_energy_absorber/F");
   this->GetTree()->Branch("Total_ion_energy_absorber",   &this->Total_ion_energy_absorber,   "Total_ion_energy_absorber/F");
-  this->GetTree()->Branch("Total_nonion_energy_absorber",&this->Total_nonion_energy_absorber,"Total_nonion_energy_absorber/F");
+  this->GetTree()->Branch("Total_nonion_energy_absorber", &this->Total_nonion_energy_absorber,"Total_nonion_energy_absorber/F");
+  this->GetTree()->Branch("Tot_phot_cer",		   &this->Tot_phot_cer,			 "Tot_phot_cer/F");
   
   this->GetTree()->Branch("Total_delta_world",        &this->Total_delta_world,        "Total_delta_world/F");
   this->GetTree()->Branch("Total_energy_world",       &this->Total_energy_world,       "Total_energy_world/F");
@@ -134,6 +135,7 @@ void CreateTree::Clear()
   Total_energy_absorber        = 0;
   Total_ion_energy_absorber    = 0;
   Total_nonion_energy_absorber = 0;
+  Tot_phot_cer = 0;
   
   Total_delta_world         = 0;
   Total_energy_world        = 0;
