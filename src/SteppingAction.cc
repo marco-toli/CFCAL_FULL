@@ -71,11 +71,11 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
     G4String processName = theTrack->GetCreatorProcess()->GetProcessName();
     if (processName == "Cerenkov") CreateTree::Instance()->Tot_phot_cer += 1;
     
-    if( (CreateTree::Instance()->TIMING && processName != "Cerenkov") ||
-        (!CreateTree::Instance()->TIMING) )
+    if( (CreateTree::Instance()->Timing() && processName != "Cerenkov") ||
+        (!CreateTree::Instance()->Timing()) )
     theTrack->SetTrackStatus(fKillTrackAndSecondaries);
 
-    if (CreateTree::Instance()->OPPHOTONS)	{	// do this cycle only IF info on optical photons is needed
+    if (CreateTree::Instance()->OpPhotons())	{	// do this cycle only IF info on optical photons is needed
     
     cout << " ciclo timing?" << endl;
     //---------------------------------------------------------
