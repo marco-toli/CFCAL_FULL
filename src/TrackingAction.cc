@@ -39,6 +39,8 @@ void TrackingAction::PreUserTrackingAction(const G4Track* aTrack)
     oldTrackInfo -> SetParticleInformation( aTrackInfo );
     G4Track* theTrack = (G4Track*)aTrack;
     theTrack -> SetUserInformation( oldTrackInfo );
+    
+    delete aTrackInfo;
   }
 }
 
@@ -54,7 +56,8 @@ void TrackingAction::PostUserTrackingAction(const G4Track* aTrack)
   {
     for(unsigned int i = 0; i < secondaries->size(); ++i)
     {
-      G4Track* secTrack =  (*secondaries)[i];
+      G4Track* secTrack = (*secondaries)[i];
+      
       TrackInformation* newTrackInfo = new TrackInformation((*secondaries)[i]);
       newTrackInfo -> SetParentInformation( aTrackInfo );
       secTrack -> SetUserInformation( newTrackInfo );

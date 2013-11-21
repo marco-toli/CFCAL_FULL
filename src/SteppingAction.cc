@@ -74,78 +74,78 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
     if( (CreateTree::Instance()->Timing() && processName != "Cerenkov") ||
         (!CreateTree::Instance()->Timing()) )
     theTrack->SetTrackStatus(fKillTrackAndSecondaries);
-
-    if (CreateTree::Instance()->OpPhotons())	{	// do this cycle only IF info on optical photons is needed
     
-    cout << " ciclo timing?" << endl;
-    //---------------------------------------------------------
-    // storing time, energy and position of all optical photons
-    
-    G4int nStep = theTrack -> GetCurrentStepNumber();
-    
-    if( (theTrack->GetLogicalVolumeAtVertex()->GetName() == "Crystal_fiber_log") && (nStep == 1) )
+    // do this cycle only IF info on optical photons is needed
+    if (CreateTree::Instance()->OpPhotons())
     {
-      G4String processName = theTrack->GetCreatorProcess()->GetProcessName();
-      if     ( processName == "Cerenkov" )      CreateTree::Instance()->opPhoton_process.push_back( +1 );
-      else if( processName == "Scintillation" ) CreateTree::Instance()->opPhoton_process.push_back( +2 );
-      else                                      CreateTree::Instance()->opPhoton_process.push_back( -1 );
+      //---------------------------------------------------------
+      // storing time, energy and position of all optical photons
       
-      CreateTree::Instance()->opPhoton_n++;
-      CreateTree::Instance()->opPhoton_trackID.push_back( float(theTrack->GetTrackID()) );
-      CreateTree::Instance()->opPhoton_parentTrackID.push_back( float(theTrack->GetParentID()) );
-      CreateTree::Instance()->opPhoton_fiberIX.push_back( iF_X );
-      CreateTree::Instance()->opPhoton_fiberIZ.push_back( iF_Z );
-      CreateTree::Instance()->opPhoton_energy.push_back( theTrack->GetTotalEnergy()/eV );
-      CreateTree::Instance()->opPhoton_waveLength.push_back( MyMaterials::fromEvToNm(theTrack->GetTotalEnergy()/eV) );
-      CreateTree::Instance()->opPhoton_time.push_back( thePrePoint->GetGlobalTime()/picosecond );
-      CreateTree::Instance()->opPhoton_vertexX.push_back( thePrePoint->GetPosition().x()/cm );
-      CreateTree::Instance()->opPhoton_vertexY.push_back( thePrePoint->GetPosition().y()/cm );
-      CreateTree::Instance()->opPhoton_vertexZ.push_back( thePrePoint->GetPosition().z()/cm );
-      CreateTree::Instance()->opPhoton_pX.push_back( theTrack->GetVertexMomentumDirection().x() );
-      CreateTree::Instance()->opPhoton_pY.push_back( theTrack->GetVertexMomentumDirection().y() );
-      CreateTree::Instance()->opPhoton_pZ.push_back( theTrack->GetVertexMomentumDirection().z() );
-    }
-    
-    
-    //----------------------------------------------
-    // storing time, energy and position at detector
-    
-    G4bool thePrePVFound_front = false;
-    pos = thePrePVName.find("Det_layer_front");
-    if( pos != std::string::npos ) thePrePVFound_front = true;
-    G4bool thePrePVFound_rear = false;
-    pos = thePrePVName.find("Det_layer_rear");
-    if( pos != std::string::npos ) thePrePVFound_rear = true;
-    
-    G4bool thePostPVFound_front = false;
-    pos = thePostPVName.find("Det_front");
-    if( pos != std::string::npos ) thePostPVFound_front = true;
-    G4bool thePostPVFound_rear = false;
-    pos = thePostPVName.find("Det_rear");
-    if( pos != std::string::npos ) thePostPVFound_rear = true;
-    
-    if( (thePrePVFound_front == true && thePostPVFound_front == true) ||
-        (thePrePVFound_rear  == true && thePostPVFound_rear  == true) )
-    {
-      if( theTrack->GetCreatorProcess() )
+      G4int nStep = theTrack -> GetCurrentStepNumber();
+      
+      if( (theTrack->GetLogicalVolumeAtVertex()->GetName() == "Crystal_fiber_log") && (nStep == 1) )
       {
         G4String processName = theTrack->GetCreatorProcess()->GetProcessName();
-        if     ( processName == "Cerenkov" )      CreateTree::Instance()->opPhoton_process_det.push_back( +1 );
-        else if( processName == "Scintillation" ) CreateTree::Instance()->opPhoton_process_det.push_back( +2 );
-        else                                      CreateTree::Instance()->opPhoton_process_det.push_back( -1 );
+        if     ( processName == "Cerenkov" )      CreateTree::Instance()->opPhoton_process.push_back( +1 );
+        else if( processName == "Scintillation" ) CreateTree::Instance()->opPhoton_process.push_back( +2 );
+        else                                      CreateTree::Instance()->opPhoton_process.push_back( -1 );
+        
+        CreateTree::Instance()->opPhoton_n++;
+        CreateTree::Instance()->opPhoton_trackID.push_back( float(theTrack->GetTrackID()) );
+        CreateTree::Instance()->opPhoton_parentTrackID.push_back( float(theTrack->GetParentID()) );
+        CreateTree::Instance()->opPhoton_fiberIX.push_back( iF_X );
+        CreateTree::Instance()->opPhoton_fiberIZ.push_back( iF_Z );
+        CreateTree::Instance()->opPhoton_energy.push_back( theTrack->GetTotalEnergy()/eV );
+        CreateTree::Instance()->opPhoton_waveLength.push_back( MyMaterials::fromEvToNm(theTrack->GetTotalEnergy()/eV) );
+        CreateTree::Instance()->opPhoton_time.push_back( thePrePoint->GetGlobalTime()/picosecond );
+        CreateTree::Instance()->opPhoton_vertexX.push_back( thePrePoint->GetPosition().x()/cm );
+        CreateTree::Instance()->opPhoton_vertexY.push_back( thePrePoint->GetPosition().y()/cm );
+        CreateTree::Instance()->opPhoton_vertexZ.push_back( thePrePoint->GetPosition().z()/cm );
+        CreateTree::Instance()->opPhoton_pX.push_back( theTrack->GetVertexMomentumDirection().x() );
+        CreateTree::Instance()->opPhoton_pY.push_back( theTrack->GetVertexMomentumDirection().y() );
+        CreateTree::Instance()->opPhoton_pZ.push_back( theTrack->GetVertexMomentumDirection().z() );
       }
       
-      CreateTree::Instance()->opPhoton_n_det++;
-      CreateTree::Instance()->opPhoton_trackID_det.push_back( float(theTrack->GetTrackID()) );
-      CreateTree::Instance()->opPhoton_parentTrackID_det.push_back( float(theTrack->GetParentID()) );
-      CreateTree::Instance()->opPhoton_fiberIX_det.push_back( iF_X );
-      CreateTree::Instance()->opPhoton_fiberIZ_det.push_back( iF_Z );
-      CreateTree::Instance()->opPhoton_energy_det.push_back( theTrack->GetTotalEnergy()/eV );
-      CreateTree::Instance()->opPhoton_waveLength_det.push_back( MyMaterials::fromEvToNm(theTrack->GetTotalEnergy()/eV) );
-      CreateTree::Instance()->opPhoton_time_det.push_back( theTrack->GetGlobalTime()/picosecond );
-    }
-   }	// opphotons needed
-  }
+      
+      //----------------------------------------------
+      // storing time, energy and position at detector
+      
+      G4bool thePrePVFound_front = false;
+      pos = thePrePVName.find("Det_layer_front");
+      if( pos != std::string::npos ) thePrePVFound_front = true;
+      G4bool thePrePVFound_rear = false;
+      pos = thePrePVName.find("Det_layer_rear");
+      if( pos != std::string::npos ) thePrePVFound_rear = true;
+      
+      G4bool thePostPVFound_front = false;
+      pos = thePostPVName.find("Det_front");
+      if( pos != std::string::npos ) thePostPVFound_front = true;
+      G4bool thePostPVFound_rear = false;
+      pos = thePostPVName.find("Det_rear");
+      if( pos != std::string::npos ) thePostPVFound_rear = true;
+      
+      if( (thePrePVFound_front == true && thePostPVFound_front == true) ||
+          (thePrePVFound_rear  == true && thePostPVFound_rear  == true) )
+      {
+        if( theTrack->GetCreatorProcess() )
+        {
+          G4String processName = theTrack->GetCreatorProcess()->GetProcessName();
+          if     ( processName == "Cerenkov" )      CreateTree::Instance()->opPhoton_process_det.push_back( +1 );
+          else if( processName == "Scintillation" ) CreateTree::Instance()->opPhoton_process_det.push_back( +2 );
+          else                                      CreateTree::Instance()->opPhoton_process_det.push_back( -1 );
+        }
+        
+        CreateTree::Instance()->opPhoton_n_det++;
+        CreateTree::Instance()->opPhoton_trackID_det.push_back( float(theTrack->GetTrackID()) );
+        CreateTree::Instance()->opPhoton_parentTrackID_det.push_back( float(theTrack->GetParentID()) );
+        CreateTree::Instance()->opPhoton_fiberIX_det.push_back( iF_X );
+        CreateTree::Instance()->opPhoton_fiberIZ_det.push_back( iF_Z );
+        CreateTree::Instance()->opPhoton_energy_det.push_back( theTrack->GetTotalEnergy()/eV );
+        CreateTree::Instance()->opPhoton_waveLength_det.push_back( MyMaterials::fromEvToNm(theTrack->GetTotalEnergy()/eV) );
+        CreateTree::Instance()->opPhoton_time_det.push_back( theTrack->GetGlobalTime()/picosecond );
+      }
+    } // do this cycle only IF info on optical photons is needed
+  } // optical photon
   
   
   // non optical photon
