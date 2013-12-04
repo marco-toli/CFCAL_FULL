@@ -53,6 +53,11 @@ public:
   float InitalMomentumDirectionY;
   float InitalMomentumDirectionZ;
   
+  float PrimaryParticleX[1000];
+  float PrimaryParticleY[1000];
+  float PrimaryParticleZ[1000];
+  float PrimaryParticleE[1000];
+  
   std::vector<float> Energy_deposited;
   std::vector<float> depositionX;
   std::vector<float> depositionY;
@@ -78,6 +83,11 @@ public:
   
   float Total_energy[250][300];
   float Total_nonion_energy[250][300];
+  
+  float Radial_stepLength;
+  float Longitudinal_stepLength;
+  float Radial_ion_energy_absorber[5000];
+  float Longitudinal_ion_energy_absorber[1000];
   
   int opPhoton_n;
   std::vector<int> opPhoton_process;
