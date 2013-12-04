@@ -34,7 +34,6 @@ CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos
   this->GetTree()->Branch("Total_energy_absorber",       &this->Total_energy_absorber,       "Total_energy_absorber/F");
   this->GetTree()->Branch("Total_ion_energy_absorber",   &this->Total_ion_energy_absorber,   "Total_ion_energy_absorber/F");
   this->GetTree()->Branch("Total_nonion_energy_absorber", &this->Total_nonion_energy_absorber,"Total_nonion_energy_absorber/F");
-  this->GetTree()->Branch("Tot_phot_cer",		   &this->Tot_phot_cer,			 "Tot_phot_cer/F");
   
   this->GetTree()->Branch("Total_delta_world",        &this->Total_delta_world,        "Total_delta_world/F");
   this->GetTree()->Branch("Total_energy_world",       &this->Total_energy_world,       "Total_energy_world/F");
@@ -42,6 +41,12 @@ CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos
   this->GetTree()->Branch("Total_nonion_energy_world",&this->Total_nonion_energy_world,"Total_nonion_energy_world/F");
   
   this->GetTree()->Branch("Total_em_energy",&this->Total_em_energy,"Total_em_energy/F");
+  this->GetTree()->Branch("Tot_phot_cer",   &this->Tot_phot_cer,   "Tot_phot_cer/F");
+  
+  this->GetTree()->Branch("Radial_stepLength",               &this->Radial_stepLength,               "Radial_stepLength/F");
+  this->GetTree()->Branch("Longitudinal_stepLength",         &this->Longitudinal_stepLength,         "Longitudinal_stepLength/F");
+  this->GetTree()->Branch("Radial_ion_energy_absorber",      &this->Radial_ion_energy_absorber,      "Radial_ion_energy_absorber[5000]/F");
+  this->GetTree()->Branch("Longitudinal_ion_energy_absorber",&this->Longitudinal_ion_energy_absorber,"Longitudinal_ion_energy_absorber[1000]/F");
   
   if( this -> INIT_DATA )
   {
@@ -54,6 +59,11 @@ CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos
     this->GetTree()->Branch("InitalMomentumDirectionX",&this->InitalMomentumDirectionX,"InitalMomentumDirectionX/F");
     this->GetTree()->Branch("InitalMomentumDirectionY",&this->InitalMomentumDirectionY,"InitalMomentumDirectionY/F");
     this->GetTree()->Branch("InitalMomentumDirectionZ",&this->InitalMomentumDirectionZ,"InitalMomentumDirectionZ/F");
+    
+    this->GetTree()->Branch("PrimaryParticleX",&this->PrimaryParticleX,"PrimaryParticleX[1000]/F");
+    this->GetTree()->Branch("PrimaryParticleY",&this->PrimaryParticleY,"PrimaryParticleY[1000]/F");
+    this->GetTree()->Branch("PrimaryParticleZ",&this->PrimaryParticleZ,"PrimaryParticleZ[1000]/F");
+    this->GetTree()->Branch("PrimaryParticleE",&this->PrimaryParticleE,"PrimaryParticleE[1000]/F");
   }
   
   if( this -> POS_FIBER)
@@ -135,7 +145,6 @@ void CreateTree::Clear()
   Total_energy_absorber        = 0;
   Total_ion_energy_absorber    = 0;
   Total_nonion_energy_absorber = 0;
-  Tot_phot_cer = 0;
   
   Total_delta_world         = 0;
   Total_energy_world        = 0;
@@ -143,6 +152,18 @@ void CreateTree::Clear()
   Total_nonion_energy_world = 0;
   
   Total_em_energy = 0;
+  Tot_phot_cer = 0;
+  
+  Radial_stepLength = 0.;
+  Longitudinal_stepLength = 0.;
+  for(int i = 0; i < 5000; ++i)
+  {
+    Radial_ion_energy_absorber[i] = 0.;
+  }
+  for(int i = 0; i < 1000; ++i)
+  {
+    Longitudinal_ion_energy_absorber[i] = 0.;
+  }
   
   if( this->INIT_DATA )
   {
@@ -155,6 +176,14 @@ void CreateTree::Clear()
     InitalMomentumDirectionX = 0;
     InitalMomentumDirectionY = 0;
     InitalMomentumDirectionZ = 0;
+    
+    for(int i = 0; i < 1000; ++i)
+    {
+      PrimaryParticleX[i] = 0.;
+      PrimaryParticleY[i] = 0.;
+      PrimaryParticleZ[i] = 0.;
+      PrimaryParticleE[i] = 0.;
+    }
   }
   
   if( this->ENERGY_FIBER )

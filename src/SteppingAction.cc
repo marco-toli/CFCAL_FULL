@@ -64,6 +64,22 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
   
   
   
+  // primary particle
+  if( theTrack->GetTrackID() == 1 )
+  {
+    G4int nStep = theTrack -> GetCurrentStepNumber() - 1;
+    if( nStep < 1000 )
+    {
+      G4ThreeVector pos = thePostPoint -> GetPosition();
+      
+      CreateTree::Instance()->PrimaryParticleX[nStep] = pos[0]/mm;
+      CreateTree::Instance()->PrimaryParticleY[nStep] = pos[1]/mm;
+      CreateTree::Instance()->PrimaryParticleZ[nStep] = pos[2]/mm;
+      CreateTree::Instance()->PrimaryParticleE[nStep] = thePostPoint->GetTotalEnergy()/GeV;
+    }
+  }
+  
+  
   
   // optical photon
   if( particleType == G4OpticalPhoton::OpticalPhotonDefinition() )
@@ -169,7 +185,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
       CreateTree::Instance()->Total_ion_energy_world    += ion_energy;
       CreateTree::Instance()->Total_nonion_energy_world += nonion_energy;
       
-      if( thePrePVName == "Box_abs_phys" || thePrePVLogName == "Crystal_fiber_log" )
+      if( thePrePVName == "Box_abs_phys" || thePrePVLogName == "Crystal_fiber_log" || thePrePVLogName == "Brass_hole_log" )
       {
         CreateTree::Instance()->Total_delta_absorber         += delta;
         CreateTree::Instance()->Total_energy_absorber        += energy;
@@ -190,10 +206,21 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
           CreateTree::Instance()->Total_nonion_energy[iF_X][iF_Z] += nonion_energy;	               
         }
       }
+
+      G4ThreeVector pos = thePostPoint -> GetPosition();	
+      
+      G4int iRadius = sqrt( pow(pos[0]/mm-CreateTree::Instance()->InitialPositionX,2) +
+                            pow(pos[1]/mm-CreateTree::Instance()->InitialPositionY,2) ) / CreateTree::Instance()->Radial_stepLength;
+      if( iRadius <= 4999 )
+        CreateTree::Instance()->Radial_ion_energy_absorber[iRadius] += ion_energy;
+      
+      G4int iDepth = (pos[2]/mm - CreateTree::Instance()->InitialPositionZ) / CreateTree::Instance()->Longitudinal_stepLength;
+      if( iDepth <= 999 )
+        CreateTree::Instance()->Longitudinal_ion_energy_absorber[iDepth] += ion_energy;
+      
       
       if( CreateTree::Instance()->Pos_fiber() )
       {
-        G4ThreeVector pos = thePostPoint -> GetPosition();	
         CreateTree::Instance() -> depositionX.push_back(pos[0]);		
         CreateTree::Instance() -> depositionY.push_back(pos[1]);
         CreateTree::Instance() -> depositionZ.push_back(pos[2]);

@@ -39,6 +39,12 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
   
   CreateTree::Instance() -> Clear();
   
+  // --------------------- STORE INFO FOR X_0 / R_M ----------------------------- //
+  int Radial_nSteps       = 5000;
+  int Longitudinal_nSteps = 1000;
+  CreateTree::Instance() -> Radial_stepLength       = 1000. / Radial_nSteps;       // in mm
+  CreateTree::Instance() -> Longitudinal_stepLength = 5000. / Longitudinal_nSteps; // in mm
+  
   // --------------------- STORE PRIMARY VERTEX ----------------------------- //
   
   if(CreateTree::Instance() -> Init_data())
@@ -47,11 +53,11 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
     G4ThreeVector InitPos = evt -> GetPrimaryVertex() -> GetPosition();
     G4ThreeVector InitDir = evt -> GetPrimaryVertex() -> GetPrimary() -> GetMomentumDirection();
     
-    CreateTree::Instance() -> InitialEnergy = InitEnergy;
+    CreateTree::Instance() -> InitialEnergy = InitEnergy/GeV;
     
-    CreateTree::Instance() -> InitialPositionX = InitPos[0];
-    CreateTree::Instance() -> InitialPositionY = InitPos[1];
-    CreateTree::Instance() -> InitialPositionZ = InitPos[2];
+    CreateTree::Instance() -> InitialPositionX = InitPos[0]/mm;
+    CreateTree::Instance() -> InitialPositionY = InitPos[1]/mm;
+    CreateTree::Instance() -> InitialPositionZ = InitPos[2]/mm;
     
     CreateTree::Instance() -> InitalMomentumDirectionX = InitDir[0];
     CreateTree::Instance() -> InitalMomentumDirectionY = InitDir[1];

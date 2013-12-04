@@ -298,7 +298,6 @@ G4Material* MyMaterials::Brass()
 
 G4Material* MyMaterials::Tungsten()
 {
-  //   G4Element* Cu = new G4Element("Copper", "Cu", z=29., a=63.546*g/mole);
   G4NistManager* man = G4NistManager::Instance();
   G4Element* W = man->FindOrBuildElement("W");
   G4Element* Ni = man->FindOrBuildElement("Ni");

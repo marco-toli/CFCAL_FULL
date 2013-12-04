@@ -122,7 +122,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Box* Det_solid = new G4Box("Det_solid",0.5*det_d,0.5*(det_d-depth),0.5*det_d);
   
   // logical
-  G4LogicalVolume* Box_abs_log = new G4LogicalVolume(Box_abs_solid,AbMaterial, "Box_abs_log", 0,0,0);
+  G4LogicalVolume* Box_abs_log = new G4LogicalVolume(Box_abs_solid,AbMaterial,"Box_abs_log", 0,0,0);
   G4LogicalVolume* Brass_hole_log = new G4LogicalVolume(Brass_hole,MyMaterials::Air(),"Brass_hole_log",0,0,0);
   G4LogicalVolume* Crystal_fiber_log = new G4LogicalVolume(Crystal_fiber,ScMaterial,"Crystal_fiber_log",0,0,0);
   G4LogicalVolume* Win_log = new G4LogicalVolume(Win_solid,WiMaterial,"win_log",0,0,0);
