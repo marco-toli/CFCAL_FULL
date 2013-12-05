@@ -1,3 +1,4 @@
+
 #include "SteppingAction.hh"
 
 #include "G4SteppingManager.hh"
@@ -85,21 +86,27 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
   if( particleType == G4OpticalPhoton::OpticalPhotonDefinition() )
   { 
     G4String processName = theTrack->GetCreatorProcess()->GetProcessName();
-    if (processName == "Cerenkov") CreateTree::Instance()->Tot_phot_cer += 1;
     
-    if( (CreateTree::Instance()->Timing() && processName != "Cerenkov") ||
-        (!CreateTree::Instance()->Timing()) )
-    theTrack->SetTrackStatus(fKillTrackAndSecondaries);
+    //if( (CreateTree::Instance()->Timing() && processName != "Cerenkov") ||
+    //    (!CreateTree::Instance()->Timing()) )
+    //theTrack->SetTrackStatus(fKillTrackAndSecondaries);
+    
+    if( (!CreateTree::Instance()->Timing()) ||
+        (CreateTree::Instance()->Timing() && thePrePoint->GetGlobalTime()/picosecond > 5000.) )
+      theTrack->SetTrackStatus(fKillTrackAndSecondaries);
+    
+    
+    G4int nStep = theTrack -> GetCurrentStepNumber();
+    if( nStep == 1 && processName == "Cerenkov" ) CreateTree::Instance()->Tot_phot_cer += 1;
+    
     
     // do this cycle only IF info on optical photons is needed
-    if (CreateTree::Instance()->OpPhotons())
+    if( CreateTree::Instance()->OpPhotons() )
     {
       //---------------------------------------------------------
       // storing time, energy and position of all optical photons
       
-      G4int nStep = theTrack -> GetCurrentStepNumber();
-      
-      if( (theTrack->GetLogicalVolumeAtVertex()->GetName() == "Crystal_fiber_log") && (nStep == 1) )
+      if( (theTrack->GetLogicalVolumeAtVertex()->GetName() == "Fiber") && (nStep == 1) )
       {
         G4String processName = theTrack->GetCreatorProcess()->GetProcessName();
         if     ( processName == "Cerenkov" )      CreateTree::Instance()->opPhoton_process.push_back( +1 );
@@ -114,9 +121,9 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
         CreateTree::Instance()->opPhoton_energy.push_back( theTrack->GetTotalEnergy()/eV );
         CreateTree::Instance()->opPhoton_waveLength.push_back( MyMaterials::fromEvToNm(theTrack->GetTotalEnergy()/eV) );
         CreateTree::Instance()->opPhoton_time.push_back( thePrePoint->GetGlobalTime()/picosecond );
-        CreateTree::Instance()->opPhoton_vertexX.push_back( thePrePoint->GetPosition().x()/cm );
-        CreateTree::Instance()->opPhoton_vertexY.push_back( thePrePoint->GetPosition().y()/cm );
-        CreateTree::Instance()->opPhoton_vertexZ.push_back( thePrePoint->GetPosition().z()/cm );
+        CreateTree::Instance()->opPhoton_vertexX.push_back( thePrePoint->GetPosition().x()/mm );
+        CreateTree::Instance()->opPhoton_vertexY.push_back( thePrePoint->GetPosition().y()/mm );
+        CreateTree::Instance()->opPhoton_vertexZ.push_back( thePrePoint->GetPosition().z()/mm );
         CreateTree::Instance()->opPhoton_pX.push_back( theTrack->GetVertexMomentumDirection().x() );
         CreateTree::Instance()->opPhoton_pY.push_back( theTrack->GetVertexMomentumDirection().y() );
         CreateTree::Instance()->opPhoton_pZ.push_back( theTrack->GetVertexMomentumDirection().z() );
@@ -127,17 +134,17 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
       // storing time, energy and position at detector
       
       G4bool thePrePVFound_front = false;
-      pos = thePrePVName.find("Det_layer_front");
+      pos = thePrePVName.find("TopDetLayer");
       if( pos != std::string::npos ) thePrePVFound_front = true;
       G4bool thePrePVFound_rear = false;
-      pos = thePrePVName.find("Det_layer_rear");
+      pos = thePrePVName.find("BtmDetLayer");
       if( pos != std::string::npos ) thePrePVFound_rear = true;
       
       G4bool thePostPVFound_front = false;
-      pos = thePostPVName.find("Det_front");
+      pos = thePostPVName.find("TopDetector");
       if( pos != std::string::npos ) thePostPVFound_front = true;
       G4bool thePostPVFound_rear = false;
-      pos = thePostPVName.find("Det_rear");
+      pos = thePostPVName.find("BtmDetector");
       if( pos != std::string::npos ) thePostPVFound_rear = true;
       
       if( (thePrePVFound_front == true && thePostPVFound_front == true) ||
@@ -185,7 +192,8 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
       CreateTree::Instance()->Total_ion_energy_world    += ion_energy;
       CreateTree::Instance()->Total_nonion_energy_world += nonion_energy;
       
-      if( thePrePVName == "Box_abs_phys" || thePrePVLogName == "Crystal_fiber_log" || thePrePVLogName == "Brass_hole_log" )
+      
+      if( thePrePVLogName == "Absorber" || thePrePVLogName == "Fiber" || thePrePVLogName == "Hole" )
       {
         CreateTree::Instance()->Total_delta_absorber         += delta;
         CreateTree::Instance()->Total_energy_absorber        += energy;
@@ -193,7 +201,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
         CreateTree::Instance()->Total_nonion_energy_absorber += nonion_energy;
       }
       
-      if( thePrePVLogName == "Crystal_fiber_log" )
+      if( thePrePVLogName == "Fiber" )
       {
         CreateTree::Instance()->Total_delta_fibers         += delta;
         CreateTree::Instance()->Total_energy_fibers        += energy;

@@ -2,7 +2,7 @@
 # initialization of G4GeneralParticleSource
 
 
-/gps/energy 100 GeV
+/gps/energy 50 GeV
 /gps/particle gamma
 
 /gps/pos/type Plane
@@ -18,4 +18,4 @@
 /gps/direction 0. 0. 1.
 
 #/tracking/verbose 1
-/run/beamOn 100
+/run/beamOn 10

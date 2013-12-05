@@ -13,7 +13,7 @@
 /vis/drawVolume
 
 # Specify view angle:
-/vis/viewer/set/viewpointThetaPhi 270 0 deg
+/vis/viewer/set/viewpointThetaPhi 180 0 deg
 
 # Specify zoom value:
 /vis/viewer/zoomTo 5
@@ -23,7 +23,7 @@
 /vis/viewer/set/style surface
 
 # Draw coordinate axes:
-/vis/scene/add/axes 0 0 0 1 m
+#/vis/scene/add/axes 0 0 0 1 m
 
 
 # Draw smooth trajectories at end of event, showing trajectory points
@@ -40,8 +40,8 @@
 # To draw only gammas:
 /vis/filtering/trajectories/create/particleFilter
 /vis/filtering/trajectories/particleFilter-0/add pi-
-#/vis/filtering/trajectories/particleFilter-0/add e-
-#/vis/filtering/trajectories/particleFilter-0/add gamma
+/vis/filtering/trajectories/particleFilter-0/add e-
+/vis/filtering/trajectories/particleFilter-0/add gamma
 #/vis/filtering/trajectories/particleFilter-0/add opticalphoton
 #
 # To invert the above, drawing all particles except gammas,

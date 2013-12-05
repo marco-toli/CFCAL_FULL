@@ -42,6 +42,7 @@
 #include "G4LogicalVolume.hh"
 #include "G4ThreeVector.hh"
 #include "G4PVPlacement.hh"
+#include "G4PVReplica.hh"
 #include "G4SubtractionSolid.hh"
 #include "G4Tubs.hh"
 #include "G4VisAttributes.hh"
@@ -54,6 +55,8 @@ DetectorConstruction::DetectorConstruction(const string& configFileName)
 {
   readConfigFile(configFileName);
   
+  if( nLayers_z%2 ==1 ) nLayers_z += 1;
+  
   
   //---------------------------------------
   //------------- Parameters --------------
@@ -63,11 +66,20 @@ DetectorConstruction::DetectorConstruction(const string& configFileName)
   
   expHall_x = expHall_y = expHall_z = 10*m;
   
-  brass_hole_radius = fiber_radius + 0.1*mm;
+  hole_radius = fiber_radius + 0.1*mm;
   
-  absorber_x = (NFIBERS_X) * spacingX + 0.5*spacingX;
-  absorber_y = fiber_length;
-  absorber_z = (NFIBERS_Z) * spacingZ;
+  module_x = fiber_length + 2.*(det_distance + win_l + depth + det_d);
+  module_y = fiber_length + 2.*(det_distance + win_l + depth + det_d);
+  module_z = (nLayers_z) * spacing_z;
+  
+  nFibers_xy = int(fiber_length / spacing_xy);
+  spacing_xy = 2. * ((fiber_length-2.*fiber_radius) / (2.*nFibers_xy-1.) );
+  
+  G4cout << "\n------------------------------------------------------------"
+         << "\n---> The calorimeter is " << nLayers_z << " layers of: " << G4endl;
+  G4cout << "absorber: " << spacing_z/mm << " mm of " << AbMaterial->GetName() << G4endl;
+  G4cout << "fibers: "   << nFibers_xy << " fibers along the x/y axis with a spacing of "<< spacing_xy/mm << " mm" << G4endl;
+  G4cout << "\n------------------------------------------------------------\n" << G4endl;
 }
 
 
@@ -89,89 +101,214 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   //------------------------------------
   //------------- Volumes --------------
   //------------------------------------
+  G4RotationMatrix* halfPiRotX = new G4RotationMatrix;
+  halfPiRotX->rotateX(M_PI/2.*rad);  
+  G4RotationMatrix* halfPiRotY = new G4RotationMatrix;
+  halfPiRotY->rotateY(M_PI/2.*rad);
+  G4RotationMatrix* halfPiRotZ = new G4RotationMatrix;
+  halfPiRotZ->rotateZ(M_PI/2.*rad);
+  
   
   // The experimental Hall
-  G4Box* expHall_box = new G4Box("World",expHall_x,expHall_y,expHall_z);
-  G4LogicalVolume* expHall_log = new G4LogicalVolume(expHall_box,MyMaterials::Air(),"World",0,0,0);
-  G4VPhysicalVolume* expHall_phys = new G4PVPlacement(0,G4ThreeVector(),expHall_log,"World",0,false,0);
+  G4VSolid* worldS = new G4Box("World",0.5*expHall_x,0.5*expHall_y,0.5*expHall_z);
+  G4LogicalVolume* worldLV = new G4LogicalVolume(worldS,MyMaterials::Air(),"World",0,0,0);
+  G4VPhysicalVolume* worldPV = new G4PVPlacement(0,G4ThreeVector(),worldLV,"World",0,false,0,true);
   
   
-  // assigning X,Y coordinates to each fiber
-  G4double x [250][300];
-  G4double z [250][300];
+  // The calorimeter
+  G4VSolid* calorS = new G4Box("Calorimeter",0.5*module_x*NMODULES_X,0.5*module_y*NMODULES_Y,0.5*module_z);
+  G4LogicalVolume* calorLV = new G4LogicalVolume(calorS,MyMaterials::Air(),"Calorimeter");
+  new G4PVPlacement(0,G4ThreeVector(),calorLV,"Calorimeter",worldLV,false,0,true);
   
-  G4cout << "NFIBERS_X: " << NFIBERS_X << "   NFIBERS_Z: " << NFIBERS_Z << G4endl;
-  for (int iF_X = 0; iF_X < NFIBERS_X; iF_X++)
+  
+  // Matrix
+  G4VSolid* matrixS = new G4Box("Matrix",0.5*module_x*NMODULES_X,0.5*module_y,0.5*module_z);
+  G4LogicalVolume* matrixLV = new G4LogicalVolume(matrixS,MyMaterials::Air(),"Matrix");
+  new G4PVReplica("Matrix",matrixLV,calorLV,kYAxis,NMODULES_Y,module_y);
+  
+  
+  // Module
+  G4VSolid* moduleS = new G4Box("Module",0.5*module_x,0.5*module_y,0.5*module_z);
+  G4LogicalVolume* moduleLV = new G4LogicalVolume(moduleS,MyMaterials::Air(),"Module");
+  new G4PVReplica("Module",moduleLV,matrixLV,kXAxis,NMODULES_X,module_x);
+  
+  
+  // A layer
+  G4VSolid* layerS = new G4Box("Layer",0.5*module_x,0.5*module_y,spacing_z);
+  G4LogicalVolume* layerLV = new G4LogicalVolume(layerS,MyMaterials::Air(),"Layer");
+  new G4PVReplica("Layer",layerLV,moduleLV,kZAxis,int(nLayers_z/2),2.*spacing_z);
+  
+  
+  // Absorber
+  G4VSolid* absorberS = new G4Box("Absorber",0.5*fiber_length,0.5*fiber_length,spacing_z);
+  G4LogicalVolume* absorberLV = new G4LogicalVolume(absorberS,AbMaterial,"Absorber");
+  fAbsorberPV = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.),absorberLV,"Absorber",layerLV,false,0,true);
+  
+  
+  // Holes
+  G4VSolid* holeS = new G4Tubs("Hole",fiber_radius,hole_radius,0.5*fiber_length,0.*deg,360.*deg);
+  G4LogicalVolume* holeLV = new G4LogicalVolume(holeS,MyMaterials::Air(),"Hole");
+  
+  for(int iX = 0; iX < nFibers_xy; ++iX)
   {
-    for(int iF_Z = 0; iF_Z < NFIBERS_Z; iF_Z++)
-    {
-      if( iF_Z%2 == 0 ) x[iF_X][iF_Z] = -(NFIBERS_X)/2*spacingX + iF_X*spacingX - 0.25*spacingX;
-      else              x[iF_X][iF_Z] = -(NFIBERS_X)/2*spacingX + iF_X*spacingX + 0.25*spacingX;
-      z[iF_X][iF_Z] = fiber_radius - 1.*(NFIBERS_Z)/2*spacingZ + iF_Z*spacingZ;
-      //G4cout << " x,y fiber[" << iF_X << "]["<<iF_Z<< "] = (" << x[iF_X][iF_Z] << "," << y[iF_X][iF_Z] << ")" << G4endl;
-    }
+    G4double x1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
+    G4double x2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
+    G4double y1 = 0.;
+    G4double y2 = 0.;
+    G4double z1 = -0.5*spacing_z;
+    G4double z2 = +0.5*spacing_z;
+    
+    fVHole1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),holeLV,"vHole1",absorberLV,false,0,false);
+    fVHole2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),holeLV,"vHole2",absorberLV,false,0,false);
+    
+    x1 = 0.;
+    x2 = 0.;
+    y1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
+    y2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
+    z1 = -0.5*spacing_z + spacing_xy;
+    z2 = +0.5*spacing_z + spacing_xy;
+    
+    fHHole1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),holeLV,"hHole1",absorberLV,false,0,false);
+    fHHole2PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),holeLV,"hHole2",absorberLV,false,0,false);    
   }
   
   
-  // solids
-  G4Box* Box_abs_solid = new G4Box("Box_abs_solid",0.5*absorber_x,0.5*absorber_y,0.5*absorber_z);
-  G4Tubs* Brass_hole = new G4Tubs("Brass_hole",fiber_radius, brass_hole_radius,0.5*fiber_length,0.*deg,360.*deg);
-  G4Tubs* Crystal_fiber = new G4Tubs("Crystal_fiber",0,fiber_radius,0.5*fiber_length,0.*deg,360.*deg);
-  G4Tubs* Win_solid = new G4Tubs("Win_solid",0.0,win_r,0.5*win_l,0.*deg,360.*deg);
-  G4Box* Det_layer_solid = new G4Box("Det_layer_solid",0.5*det_d,0.5*depth,0.5*det_d);
-  G4Box* Det_solid = new G4Box("Det_solid",0.5*det_d,0.5*(det_d-depth),0.5*det_d);
+  // Fibers
+  G4VSolid* fiberS = new G4Tubs("Fiber",0.,fiber_radius,0.5*fiber_length,0.*deg,360.*deg);
+  G4LogicalVolume* fiberLV = new G4LogicalVolume(fiberS,ScMaterial,"Fiber");
   
-  // logical
-  G4LogicalVolume* Box_abs_log = new G4LogicalVolume(Box_abs_solid,AbMaterial,"Box_abs_log", 0,0,0);
-  G4LogicalVolume* Brass_hole_log = new G4LogicalVolume(Brass_hole,MyMaterials::Air(),"Brass_hole_log",0,0,0);
-  G4LogicalVolume* Crystal_fiber_log = new G4LogicalVolume(Crystal_fiber,ScMaterial,"Crystal_fiber_log",0,0,0);
-  G4LogicalVolume* Win_log = new G4LogicalVolume(Win_solid,WiMaterial,"win_log",0,0,0);
-  G4LogicalVolume* Det_layer_log = new G4LogicalVolume(Det_layer_solid,DeMaterial,"Det_layer_log",0,0,0);
-  G4LogicalVolume* Det_log = new G4LogicalVolume(Det_solid,DeMaterial,"Det_log",0,0,0);
-  
-  // physical: placement 
-  G4RotationMatrix* piRot = new G4RotationMatrix;
-  piRot->rotateX(M_PI/2.*rad);
-  
-  G4VPhysicalVolume* Box_abs_phys = new G4PVPlacement(0, G4ThreeVector(0,0,0), Box_abs_log, "Box_abs_phys", expHall_log, false, 0);
-  G4VPhysicalVolume* Brass_hole_phys[250][300];
-  G4VPhysicalVolume* Crystal_phys[250][300];
-  G4VPhysicalVolume* Win_front_phys[250][300];
-  G4VPhysicalVolume* Win_rear_phys[250][300];
-  G4VPhysicalVolume* Det_layer_front_phys[250][300];
-  G4VPhysicalVolume* Det_layer_rear_phys[250][300];
-  G4VPhysicalVolume* Det_front_phys[250][300];
-  G4VPhysicalVolume* Det_rear_phys[250][300];
-  
-  char name[60];
-  for (int iF_X = 0; iF_X < NFIBERS_X; iF_X++)
+  for(int iX = 0; iX < nFibers_xy; ++iX)
   {
-    for (int iF_Z = 0; iF_Z < NFIBERS_Z; iF_Z++)
-    {
-      sprintf(name,"Hole_x%03d_z%03d",iF_X,iF_Z);
-      Brass_hole_phys[iF_X][iF_Z] = new G4PVPlacement(piRot, G4ThreeVector(x[iF_X][iF_Z],0,z[iF_X][iF_Z]), Brass_hole_log, name, Box_abs_log, false, 0);
-      
-      sprintf(name,"Fiber_x%03d_z%03d",iF_X,iF_Z);
-      Crystal_phys[iF_X][iF_Z] = new G4PVPlacement(piRot, G4ThreeVector(x[iF_X][iF_Z],0,z[iF_X][iF_Z]), Crystal_fiber_log, name, Box_abs_log, false, 0);     
-      
-      sprintf(name,"Win_front_x%03d_z%03d",iF_X,iF_Z);
-      Win_front_phys[iF_X][iF_Z] = new G4PVPlacement(piRot, G4ThreeVector(x[iF_X][iF_Z],0.5*fiber_length+det_distance+0.5*win_l,z[iF_X][iF_Z]), Win_log, name, expHall_log, false, 0);
-      
-      sprintf(name,"Win_rear_x%03d_z%03d",iF_X,iF_Z);
-      Win_rear_phys[iF_X][iF_Z] = new G4PVPlacement(piRot, G4ThreeVector(x[iF_X][iF_Z],-0.5*fiber_length-det_distance-0.5*win_l,z[iF_X][iF_Z]), Win_log, name, expHall_log, false, 0);
-      
-      sprintf(name,"Det_layer_front_x%03d_z%03d",iF_X,iF_Z);
-      Det_layer_front_phys[iF_X][iF_Z] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Z],0.5*fiber_length+det_distance+win_l+0.5*depth,z[iF_X][iF_Z]), Det_layer_log, name, expHall_log, false, 0);
-      
-      sprintf(name,"Det_layer_rear_x%03d_z%03d",iF_X,iF_Z);
-      Det_layer_rear_phys[iF_X][iF_Z] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Z],-0.5*fiber_length-det_distance-win_l-0.5*depth,z[iF_X][iF_Z]), Det_layer_log, name, expHall_log, false, 0);
-      
-      sprintf(name,"Det_front_x%03d_z%03d",iF_X,iF_Z);
-      Det_front_phys[iF_X][iF_Z] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Z],0.5*fiber_length+det_distance+win_l+depth+0.5*(det_d-depth),z[iF_X][iF_Z]), Det_log, name, expHall_log, false, 0);
-      
-      sprintf(name,"Det_rear_x%03d_z%03d",iF_X,iF_Z);
-      Det_rear_phys[iF_X][iF_Z] = new G4PVPlacement(0, G4ThreeVector(x[iF_X][iF_Z],-0.5*fiber_length-det_distance-win_l-depth-0.5*(det_d-depth),z[iF_X][iF_Z]), Det_log, name, expHall_log, false, 0);
-    }
+    G4double x1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
+    G4double x2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
+    G4double y1 = 0.;
+    G4double y2 = 0.;
+    G4double z1 = -0.5*spacing_z;
+    G4double z2 = +0.5*spacing_z;
+    
+    fVFiber1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),fiberLV,"VFiber1",absorberLV,false,0,false);
+    fVFiber2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),fiberLV,"VFiber2",absorberLV,false,0,false);
+    
+    x1 = 0.;
+    x2 = 0.;
+    y1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
+    y2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
+    z1 = -0.5*spacing_z + spacing_xy;
+    z2 = +0.5*spacing_z + spacing_xy;
+    
+    fHFiber1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),fiberLV,"HFiber1",absorberLV,false,0,false);
+    fHFiber1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),fiberLV,"HFiber2",absorberLV,false,0,false);
+  }
+  
+  
+  // Windows
+  G4VSolid* windowS = new G4Tubs("Window",0.0,win_r,0.5*win_l,0.*deg,360.*deg);
+  G4LogicalVolume* windowLV = new G4LogicalVolume(windowS,WiMaterial,"Window");
+  
+  for(int iX = 0; iX < nFibers_xy; ++iX)
+  {
+    G4double x1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
+    G4double x2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
+    G4double y1 = 0.5*fiber_length + det_distance + 0.5*win_l;
+    G4double y2 = 0.5*fiber_length + det_distance + 0.5*win_l;
+    G4double z1 = -0.5*spacing_z;
+    G4double z2 = +0.5*spacing_z;
+    
+    fVTopWindow1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),windowLV,"vWindow1",absorberLV,false,0,false);
+    fVTopWindow2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),windowLV,"vWindow2",absorberLV,false,0,false);
+    
+    y1 *= -1.;
+    y2 *= -1.;
+    
+    fVBtmWindow1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),windowLV,"vWindow1",layerLV,false,0,false);
+    fVBtmWindow2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),windowLV,"vWindow2",layerLV,false,0,false);
+    
+    
+    x1 = 0.5*fiber_length + det_distance + 0.5*win_l;
+    x2 = 0.5*fiber_length + det_distance + 0.5*win_l;
+    y1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
+    y2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
+    z1 = -0.5*spacing_z + spacing_xy;
+    z2 = +0.5*spacing_z + spacing_xy;
+    
+    fHTopWindow1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),windowLV,"hWindow1",absorberLV,false,0,false);
+    fHTopWindow2PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),windowLV,"hWindow2",absorberLV,false,0,false);
+    
+    x1 *= -1.;
+    x2 *= -1.;
+    
+    fHBtmWindow1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),windowLV,"hWindow1",layerLV,false,0,false);
+    fHBtmWindow2PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),windowLV,"hWindow2",layerLV,false,0,false);
+  }
+  
+  
+  // Detectors
+  G4VSolid* detLayerS = new G4Box("DetLayer",0.5*det_d,0.5*depth,0.5*det_d);
+  G4VSolid* detectorS = new G4Box("Detector",0.5*det_d,0.5*det_d,0.5*det_d);
+  G4LogicalVolume* detectorLV = new G4LogicalVolume(detectorS,DeMaterial,"Detector");
+  G4LogicalVolume* detLayerLV = new G4LogicalVolume(detLayerS,DeMaterial,"DetLayer");
+  
+  for(int iX = 0; iX < nFibers_xy; ++iX)
+  {
+    G4double x1 = -0.5*fiber_length + hole_radius+iX*spacing_xy;
+    G4double x2 = -0.5*fiber_length + hole_radius+(iX+0.5)*spacing_xy;
+    G4double y1 = 0.5*fiber_length + det_distance + win_l + 0.5*depth;
+    G4double y2 = 0.5*fiber_length + det_distance + win_l + 0.5*depth;
+    G4double z1 = -0.5*spacing_z;
+    G4double z2 = +0.5*spacing_z;
+    
+    fVTopDetLayer1PV[iX] = new G4PVPlacement(0,G4ThreeVector(x1,y1,z1),detLayerLV,"vTopDetLayer1",layerLV,false,0,false);
+    fVTopDetLayer2PV[iX] = new G4PVPlacement(0,G4ThreeVector(x2,y2,z2),detLayerLV,"vTopDetLayer2",layerLV,false,0,false);
+    
+    y1 *= -1.;
+    y2 *= -1.;
+    
+    fVBtmDetLayer1PV[iX] = new G4PVPlacement(0,G4ThreeVector(x1,y1,z1),detLayerLV,"vBtmDetLayer1",layerLV,false,0,false);
+    fVBtmDetLayer2PV[iX] = new G4PVPlacement(0,G4ThreeVector(x2,y2,z2),detLayerLV,"vBtmDetLayer2",layerLV,false,0,false);
+    
+    
+    y1 = 0.5*fiber_length + det_distance + win_l + depth + 0.5*det_d;
+    y2 = 0.5*fiber_length + det_distance + win_l + depth + 0.5*det_d;
+    
+    fVTopDetector1PV[iX] = new G4PVPlacement(0,G4ThreeVector(x1,y1,z1),detectorLV,"vTopDetector1",layerLV,false,0,false);
+    fVTopDetector2PV[iX] = new G4PVPlacement(0,G4ThreeVector(x2,y2,z2),detectorLV,"vTopDetector2",layerLV,false,0,false);
+    
+    y1 *= -1.;
+    y2 *= -1.;
+    
+    fVBtmDetector1PV[iX] = new G4PVPlacement(0,G4ThreeVector(x1,y1,z1),detectorLV,"vBtmDetector1",layerLV,false,0,false);
+    fVBtmDetector2PV[iX] = new G4PVPlacement(0,G4ThreeVector(x2,y2,z2),detectorLV,"vBtmDetector2",layerLV,false,0,false);
+    
+    
+    
+    x1 = 0.5*fiber_length + det_distance + win_l + 0.5*depth;
+    x2 = 0.5*fiber_length + det_distance + win_l + 0.5*depth;
+    y1 = -0.5*fiber_length + hole_radius+iX*spacing_xy;
+    y2 = -0.5*fiber_length + hole_radius+(iX+0.5)*spacing_xy;
+    z1 = -0.5*spacing_z + spacing_xy;
+    z2 = +0.5*spacing_z + spacing_xy;
+    
+    fHTopDetLayer1PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detLayerLV,"hTopDetLayer1",layerLV,false,0,false);
+    fHTopDetLayer2PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detLayerLV,"hTopDetLayer2",layerLV,false,0,false);
+    
+    x1 *= -1.;
+    x2 *= -1.;
+    
+    fHBtmDetLayer1PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detLayerLV,"hBtmDetLayer1",layerLV,false,0,false);
+    fHBtmDetLayer2PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detLayerLV,"hBtmDetLayer2",layerLV,false,0,false);
+    
+    
+    x1 = 0.5*fiber_length + det_distance + win_l + depth + 0.5*det_d;
+    x2 = 0.5*fiber_length + det_distance + win_l + depth + 0.5*det_d;
+    
+    fHTopDetector1PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detectorLV,"hTopDetector1",layerLV,false,0,false);
+    fHTopDetector2PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detectorLV,"hTopDetector2",layerLV,false,0,false);
+    
+    x1 *= -1.;
+    x2 *= -1.;
+    
+    fHBtmDetector1PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detectorLV,"hBtmDetector1",layerLV,false,0,false);
+    fHBtmDetector2PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detectorLV,"hBtmDetector2",layerLV,false,0,false);
   }
   
   
@@ -190,46 +327,62 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Colour  magenta (1.0, 0.0, 1.0) ;  // magenta 
   G4Colour  yellow  (1.0, 1.0, 0.0) ;  // yellow
   G4Colour  brass   (0.8, 0.6, 0.4) ;  // brass
-  G4Colour  brown   (0.7, 0.4, 0.1) ;  // brass
+  G4Colour  brown   (0.7, 0.4, 0.1) ;  // brown
   
   G4VisAttributes* VisAttWorld = new G4VisAttributes(white);
   VisAttWorld->SetVisibility(true);
   VisAttWorld->SetForceWireframe(true);
-  expHall_log->SetVisAttributes(VisAttWorld);
+  worldLV->SetVisAttributes(VisAttWorld);
   
-  G4VisAttributes* VisAttAbs = new G4VisAttributes(brass);
-  VisAttAbs->SetVisibility(true);
-  VisAttAbs->SetForceWireframe(true);
-  Box_abs_log->SetVisAttributes(VisAttAbs);
+  G4VisAttributes* VisAttCalor = new G4VisAttributes(white);
+  VisAttCalor->SetVisibility(true);
+  VisAttCalor->SetForceWireframe(true);
+  calorLV->SetVisAttributes(VisAttCalor);
   
-  G4VisAttributes* VisAttCrystal = new G4VisAttributes(green);
-  VisAttCrystal->SetVisibility(true);
-  VisAttCrystal->SetForceWireframe(false);
-  Crystal_fiber_log->SetVisAttributes(VisAttCrystal);
+  G4VisAttributes* VisAttMatrix = new G4VisAttributes(red);
+  VisAttMatrix->SetVisibility(false);
+  VisAttMatrix->SetForceWireframe(true);
+  matrixLV->SetVisAttributes(VisAttMatrix);
   
-  G4VisAttributes* VisAttWindow = new G4VisAttributes(blue);
-  VisAttWindow->SetVisibility(true);
-  VisAttWindow->SetForceWireframe(false);
-  Win_log->SetVisAttributes(VisAttWindow);
+  G4VisAttributes* VisAttModule = new G4VisAttributes(red);
+  VisAttModule->SetVisibility(true);
+  VisAttModule->SetForceWireframe(true);
+  moduleLV->SetVisAttributes(VisAttModule);
   
-  G4VisAttributes* VisAttDetLayer = new G4VisAttributes(red);
-  VisAttDetLayer->SetVisibility(true);
-  VisAttDetLayer->SetForceWireframe(false);
-  Det_layer_log->SetVisAttributes(VisAttDetLayer);
+  G4VisAttributes* VisAttLayer = new G4VisAttributes(red);
+  VisAttLayer->SetVisibility(true);
+  VisAttLayer->SetForceWireframe(true);
+  layerLV->SetVisAttributes(VisAttLayer);
   
-  G4VisAttributes* VisAttDetector = new G4VisAttributes(gray);
-  VisAttDetector->SetVisibility(true);
-  VisAttDetector->SetForceWireframe(false);
-  Det_log->SetVisAttributes(VisAttDetector);
+  G4VisAttributes* VisAttAbsorber = new G4VisAttributes(brass);
+  VisAttAbsorber->SetVisibility(true);
+  VisAttAbsorber->SetForceWireframe(true);
+  absorberLV->SetVisAttributes(VisAttAbsorber);
   
   G4VisAttributes* VisAttHole = new G4VisAttributes(blue);
   VisAttHole->SetVisibility(false);
-  Brass_hole_log->SetVisAttributes(VisAttHole);
+  VisAttHole->SetForceWireframe(false);
+  holeLV->SetVisAttributes(VisAttHole);
+  
+  G4VisAttributes* VisAttFiber = new G4VisAttributes(green);
+  VisAttFiber->SetVisibility(true);
+  VisAttFiber->SetForceWireframe(false);
+  fiberLV->SetVisAttributes(VisAttFiber);
+  
+  G4VisAttributes* VisAttDetLayer = new G4VisAttributes(red);
+  VisAttDetLayer->SetVisibility(false);
+  VisAttDetLayer->SetForceWireframe(false);
+  detLayerLV->SetVisAttributes(VisAttDetLayer);
+  
+  G4VisAttributes* VisAttDetector = new G4VisAttributes(gray);
+  VisAttDetector->SetVisibility(false);
+  VisAttDetector->SetForceWireframe(false);
+  detectorLV->SetVisAttributes(VisAttDetector);
   
   
   
   G4cout << ">>>>>> DetectorConstruction::Construct()::end <<< " << G4endl;
-  return expHall_phys;
+  return worldPV;
 }
 
 
@@ -245,15 +398,13 @@ void DetectorConstruction::readConfigFile(string configFileName)
   config.readInto(crystal_abslength,"crystal_abslength");
   config.readInto(crystal_lightyield,"crystal_lightyield");
   
-  /*config.readInto(absorber_x,"absorber_x");
-  config.readInto(absorber_y,"absorber_y");
-  config.readInto(absorber_z,"absorber_z");*/
   config.readInto(fiber_radius,"fiber_radius");
   config.readInto(fiber_length,"fiber_length");
-  config.readInto(spacingX,"spacingX");
-  config.readInto(spacingZ,"spacingZ");
-  config.readInto(NFIBERS_X,"NFIBERS_X");
-  config.readInto(NFIBERS_Z,"NFIBERS_Z");
+  config.readInto(spacing_xy,"spacing_xy");
+  config.readInto(spacing_z,"spacing_z");
+  config.readInto(NMODULES_X,"NMODULES_X");
+  config.readInto(NMODULES_Y,"NMODULES_Y");
+  config.readInto(nLayers_z,"nLayers_z");
   config.readInto(abs_material,"abs_material");
   
   config.readInto(win_r,"win_r");
@@ -265,28 +416,6 @@ void DetectorConstruction::readConfigFile(string configFileName)
   config.readInto(det_material,"det_material");
   
   config.readInto(depth,"depth");
-  
-  // Crystal parameters
-  /*
-    G4double absorber_x = config.read<double>("absorber_x")*mm;
-    G4cout << "Absorber x [mm]: " << absorber_x << G4endl;
-    
-    G4double absorber_y = config.read<double>("absorber_y")*mm;
-    G4cout << "Absorber y [mm]: " << absorber_y << G4endl;
-    
-    G4double absorber_z = config.read<double>("absorber_z")*mm;
-    G4cout << "Absorber z [mm]: " << absorber_z << G4endl;
-    
-    const int NFIBERS_X = config.read<int>("NFIBERS_X");
-    G4cout << "NFIBERS_X: " << NFIBERS_X << G4endl;
-    const int NFIBERS_Z = config.read<int>("NFIBERS_Z");
-    G4cout << "NFIBERS_Z: " << NFIBERS_Z << G4endl;
-    
-    G4double spacingX = config.read<double>("spacingX")*mm;
-    G4cout << "spacingX [mm]: " << spacingX << G4endl;
-    G4double spacingZ = config.read<double>("spacingZ")*mm;
-    G4cout << "spacingZ [mm]: " << spacingZ << G4endl;
-  */
 }
 
 
@@ -315,8 +444,8 @@ void DetectorConstruction::initializeMaterials()
   else if( crystal_material == 5 ) ScMaterial = MyMaterials::PWO();
   else if( crystal_material == 6 ) ScMaterial = MyMaterials::Air();
   else if( crystal_material == 7 ) ScMaterial = MyMaterials::Quartz();
-  else if( crystal_material == 8 ) ScMaterial = MyMaterials::DSBCe();
-  else if( crystal_material == 9 ) ScMaterial = MyMaterials::SiO2Ce();
+  else if( crystal_material == 8 ) ScMaterial = MyMaterials::DSB_Ce();
+  else if( crystal_material == 9 ) ScMaterial = MyMaterials::SiO2_Ce();
   else
   {
     G4cerr << "<DetectorConstructioninitializeMaterials>: Invalid crystal material specifier " << crystal_material << G4endl;

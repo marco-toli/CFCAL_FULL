@@ -76,8 +76,8 @@ CreateTree::CreateTree(TString name, bool energy_fiber, bool init_data, bool pos
   
   if( this -> ENERGY_FIBER)
   {
-    this->GetTree()->Branch("Total_energy",&this->Total_energy,"Total_energy[250][300]/F");
-    this->GetTree()->Branch("Total_nonion_energy",&this->Total_nonion_energy,"Total_nonion_energy[250][300]/F");	  
+    this->GetTree()->Branch("Total_energy",&this->Total_energy,"Total_energy[250][400]/F");
+    this->GetTree()->Branch("Total_nonion_energy",&this->Total_nonion_energy,"Total_nonion_energy[250][400]/F");	  
   }
   
   if( this -> OPPHOTONS)
@@ -190,7 +190,7 @@ void CreateTree::Clear()
   {
     for (int iF_X = 0; iF_X < 250; iF_X++)
     {
-      for (int iF_Z = 0; iF_Z < 300; iF_Z++)
+      for (int iF_Z = 0; iF_Z < 400; iF_Z++)
       {
         Total_energy[iF_X][iF_Z] = 0;
         Total_nonion_energy[iF_X][iF_Z] = 0;	  		    	  
