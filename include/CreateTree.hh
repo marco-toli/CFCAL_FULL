@@ -1,3 +1,6 @@
+#ifndef CreateTree_H
+#define CreateTree_H 1
+
 #include <iostream>
 #include <vector>
 
@@ -16,15 +19,14 @@ private:
   
 public:
   
-  bool ENERGY_FIBER;
   bool INIT_DATA; 
-  bool POS_FIBER;
+  bool DEPOSITION;
   bool OPPHOTONS;
   bool TIMING;
   
 public:
   
-  CreateTree(TString name, bool energy_fiber, bool init_data, bool pos_fiber, bool opPhotons, bool timing);
+  CreateTree(TString name, bool init_data, bool deposition, bool opPhotons, bool timing);
   ~CreateTree();
   
   TTree*             GetTree() const { return ftree; };
@@ -35,9 +37,8 @@ public:
   static CreateTree* Instance() { return fInstance; };
   static CreateTree* fInstance;
   
-  bool Energy_fiber() const { return this -> ENERGY_FIBER; };
   bool Init_data()    const { return this -> INIT_DATA;    };
-  bool Pos_fiber()    const { return this -> POS_FIBER;    };
+  bool Deposition()   const { return this -> DEPOSITION;   };
   bool OpPhotons()    const { return this -> OPPHOTONS;    };
   bool Timing()       const { return this -> TIMING;       };
   
@@ -58,31 +59,33 @@ public:
   float PrimaryParticleZ[1000];
   float PrimaryParticleE[1000];
   
-  std::vector<float> Energy_deposited;
+  std::vector<float> depositionE;
   std::vector<float> depositionX;
   std::vector<float> depositionY;
   std::vector<float> depositionZ;
+  std::vector<int> depositionCoarseLayer;
+  std::vector<int> depositionFineLayer;
+  std::vector<int> depositionIX;
+  std::vector<int> depositionIY;
+  std::vector<int> depositionType;
   
-  float Total_delta_fibers;
   float Total_energy_fibers;
   float Total_ion_energy_fibers;
   float Total_nonion_energy_fibers;
+  float Total_ion_energy_fibers_iX[1000];
+  float Total_ion_energy_fibers_iY[1000];
+  float Total_ion_energy_fibers_iZ[1000];
   
-  float Total_delta_absorber;
   float Total_energy_absorber;
   float Total_ion_energy_absorber;
   float Total_nonion_energy_absorber;
-  float Tot_phot_cer;
-  
-  float Total_delta_world;
+    
   float Total_energy_world;
   float Total_ion_energy_world;
   float Total_nonion_energy_world;
-  
+
+  float Tot_phot_cer;
   float Total_em_energy;
-  
-  float Total_energy[250][300];
-  float Total_nonion_energy[250][300];
   
   float Radial_stepLength;
   float Longitudinal_stepLength;
@@ -94,6 +97,7 @@ public:
   std::vector<int> opPhoton_trackID;
   std::vector<int> opPhoton_parentTrackID;
   std::vector<int> opPhoton_fiberIX;
+  std::vector<int> opPhoton_fiberIY;
   std::vector<int> opPhoton_fiberIZ;
   std::vector<float> opPhoton_energy;
   std::vector<float> opPhoton_waveLength;
@@ -110,8 +114,11 @@ public:
   std::vector<int> opPhoton_trackID_det;
   std::vector<int> opPhoton_parentTrackID_det;
   std::vector<int> opPhoton_fiberIX_det;
+  std::vector<int> opPhoton_fiberIY_det;
   std::vector<int> opPhoton_fiberIZ_det;
   std::vector<float> opPhoton_energy_det;
   std::vector<float> opPhoton_waveLength_det;
   std::vector<float> opPhoton_time_det;
 };
+
+#endif

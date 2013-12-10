@@ -62,6 +62,19 @@ public:
   G4double GetModule_y() const { return module_y; };
   G4double GetModule_z() const { return module_z; };
   
+  G4int GetNModules_x() const { return nModules_x; };
+  G4int GetNModules_y() const { return nModules_y; };
+  
+  G4int GetNFibers_xy() const { return nFibers_xy; };
+  G4int GetNLayers_z()  const { return nLayers_z;  };
+  
+  G4double GetSpacing_xy() const { return spacing_xy; };
+  G4double GetSpacing_z()  const { return spacing_z;  };
+  
+  G4double GetFiberRadius() const { return fiber_radius; };
+  G4double GetFiberLength() const { return fiber_length; };
+  
+  
 public:
   G4VPhysicalVolume* Construct();
   
@@ -118,7 +131,7 @@ private:
   
   G4double fiber_length;
   G4double fiber_radius;
-  int NMODULES_X, NMODULES_Y;
+  int nModules_x, nModules_y;
   int nFibers_xy, nLayers_z;
   G4double spacing_xy, spacing_z;
   G4double hole_radius;

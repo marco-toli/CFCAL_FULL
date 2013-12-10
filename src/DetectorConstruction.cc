@@ -116,21 +116,21 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
   
   // The calorimeter
-  G4VSolid* calorS = new G4Box("Calorimeter",0.5*module_x*NMODULES_X,0.5*module_y*NMODULES_Y,0.5*module_z);
+  G4VSolid* calorS = new G4Box("Calorimeter",0.5*module_x*nModules_x,0.5*module_y*nModules_y,0.5*module_z);
   G4LogicalVolume* calorLV = new G4LogicalVolume(calorS,MyMaterials::Air(),"Calorimeter");
   new G4PVPlacement(0,G4ThreeVector(),calorLV,"Calorimeter",worldLV,false,0,true);
   
   
   // Matrix
-  G4VSolid* matrixS = new G4Box("Matrix",0.5*module_x*NMODULES_X,0.5*module_y,0.5*module_z);
+  G4VSolid* matrixS = new G4Box("Matrix",0.5*module_x*nModules_x,0.5*module_y,0.5*module_z);
   G4LogicalVolume* matrixLV = new G4LogicalVolume(matrixS,MyMaterials::Air(),"Matrix");
-  new G4PVReplica("Matrix",matrixLV,calorLV,kYAxis,NMODULES_Y,module_y);
+  new G4PVReplica("Matrix",matrixLV,calorLV,kYAxis,nModules_y,module_y);
   
   
   // Module
   G4VSolid* moduleS = new G4Box("Module",0.5*module_x,0.5*module_y,0.5*module_z);
   G4LogicalVolume* moduleLV = new G4LogicalVolume(moduleS,MyMaterials::Air(),"Module");
-  new G4PVReplica("Module",moduleLV,matrixLV,kXAxis,NMODULES_X,module_x);
+  new G4PVReplica("Module",moduleLV,matrixLV,kXAxis,nModules_x,module_x);
   
   
   // A layer
@@ -402,8 +402,8 @@ void DetectorConstruction::readConfigFile(string configFileName)
   config.readInto(fiber_length,"fiber_length");
   config.readInto(spacing_xy,"spacing_xy");
   config.readInto(spacing_z,"spacing_z");
-  config.readInto(NMODULES_X,"NMODULES_X");
-  config.readInto(NMODULES_Y,"NMODULES_Y");
+  config.readInto(nModules_x,"nModules_x");
+  config.readInto(nModules_y,"nModules_y");
   config.readInto(nLayers_z,"nLayers_z");
   config.readInto(abs_material,"abs_material");
   

@@ -145,12 +145,11 @@ int main(int argc,char** argv)
   CLHEP::HepRandom::setTheSeed(myseed);
   
   
-  G4bool energy_data = 0;
   G4bool init_data   = 1;
-  G4bool pos_fiber   = 0;
+  G4bool deposition  = 0;
   G4bool opPhotons   = 0;
   G4bool timing      = 0;
-  CreateTree* mytree = new CreateTree("tree", energy_data, init_data, pos_fiber, opPhotons, timing);
+  CreateTree* mytree = new CreateTree("tree", init_data, deposition, opPhotons, timing);
   
   
   // User Verbose output class
@@ -225,7 +224,7 @@ int main(int argc,char** argv)
   G4cout << ">>> Define TrackingAction::end <<<" << G4endl;
   
   G4cout << ">>> Define SteppingAction::begin <<<" << G4endl; 
-  SteppingAction* stepping_action = new SteppingAction;
+  SteppingAction* stepping_action = new SteppingAction(detector);
   runManager->SetUserAction(stepping_action); 
   G4cout << ">>> Define SteppingAction::end <<<" << G4endl;
   
