@@ -1,0 +1,30 @@
+##########################################################
+# label        part.    E(GeV)      Nevts   Njobs   Nfirst
+##########################################################
+e-_1GeV           e-        1.      2000       2        0
+e-_5GeV           e-        5.      2000       2        0
+e-_10GeV          e-       10.      1000       4        0
+e-_20GeV          e-       20.      1000       5        0
+e-_30GeV          e-       30.      1000       5        0
+e-_50GeV          e-       50.       500       8        0
+e-_100GeV         e-      100.       200      20        0
+e-_200GeV         e-      200.       200      20        0
+e-_500GeV         e-      500.       100      40        0
+###gamma_1GeV     gamma        1.      2000       2        0
+###gamma_5GeV     gamma        5.      2000       2        0
+###gamma_10GeV    gamma       10.      1000       4        0
+###gamma_20GeV    gamma       20.      1000       4        0
+###gamma_30GeV    gamma       30.      1000       4        0
+###gamma_50GeV    gamma       50.       500       8        0
+###gamma_100GeV   gamma      100.       200      20        0
+###gamma_200GeV   gamma      200.       200      20        0
+###gamma_500GeV   gamma      500.       100      40        0
+pi-_1GeV         pi-        1.      2000       2        0
+pi-_5GeV         pi-        5.      2000       2        0
+pi-_10GeV        pi-       10.      1000       4        0
+pi-_20GeV        pi-       20.      1000       4        0
+pi-_30GeV        pi-       30.      1000       4        0
+pi-_50GeV        pi-       50.       500       8        0
+pi-_100GeV       pi-      100.       200      20        0
+pi-_200GeV       pi-      200.       200      20        0
+pi-_500GeV       pi-      500.       100      40        0
