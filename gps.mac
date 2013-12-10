@@ -2,13 +2,13 @@
 # initialization of G4GeneralParticleSource
 
 
-/gps/energy 50 GeV
+/gps/energy 1 GeV
 /gps/particle gamma
 
 /gps/pos/type Plane
 /gps/pos/shape Square
-/gps/pos/halfx 0.5 cm
-/gps/pos/halfy 0.5 cm
+/gps/pos/halfx 22 cm # 0.5 cm
+/gps/pos/halfy 22 cm # 0.5 cm
 
 /gps/ang/type beam2d
 /gps/ang/focuspoint 0 0 1.50 m
@@ -18,4 +18,4 @@
 /gps/direction 0. 0. 1.
 
 #/tracking/verbose 1
-/run/beamOn 10
+/run/beamOn 5000
