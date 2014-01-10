@@ -21,6 +21,8 @@
 #include "CreateTree.hh"
 #include "DetectorConstruction.hh"
 #include "MyMaterials.hh"
+#include "TrackInformation.hh"
+#include "LedFiberTiming.hh"
 
 #include <iostream>
 #include <vector>
@@ -28,6 +30,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TString.h"
+#include "TRandom3.h"
 
 
 
@@ -35,13 +38,18 @@ class SteppingAction : public G4UserSteppingAction
 {
 public:
 
-  SteppingAction(const DetectorConstruction* detectorConstruction);
+  SteppingAction(const DetectorConstruction* detectorConstruction, Fiber* vFib, Fiber* hFib);
   ~SteppingAction();
   virtual void UserSteppingAction(const G4Step*);
   
   
 private:
   const DetectorConstruction* fDetectorConstruction;
+  
+  const Fiber* fVFiber;
+  const Fiber* fHFiber;
+  
+  TRandom3 ran;
 };
 
 #endif

@@ -24,12 +24,13 @@ CreateTree::CreateTree(TString name, bool init_data, bool deposition, bool opPho
   
   this->GetTree()->Branch("Event",&this->Event,"Event/I");
   
-  this->GetTree()->Branch("Total_energy_fibers",       &this->Total_energy_fibers,       "Total_energy_fibers/F");
-  this->GetTree()->Branch("Total_ion_energy_fibers",   &this->Total_ion_energy_fibers,   "Total_ion_energy_fibers/F");
-  this->GetTree()->Branch("Total_nonion_energy_fibers",&this->Total_nonion_energy_fibers,"Total_nonion_energy_fibers/F");
-  this->GetTree()->Branch("Total_ion_energy_fibers_iX",&this->Total_ion_energy_fibers_iX,"Total_ion_energy_fibers_iX[1000]/F");
-  this->GetTree()->Branch("Total_ion_energy_fibers_iY",&this->Total_ion_energy_fibers_iY,"Total_ion_energy_fibers_iY[1000]/F");
-  this->GetTree()->Branch("Total_ion_energy_fibers_iZ",&this->Total_ion_energy_fibers_iZ,"Total_ion_energy_fibers_iZ[1000]/F");
+  this->GetTree()->Branch("Total_energy_fibers",        &this->Total_energy_fibers,        "Total_energy_fibers/F");
+  this->GetTree()->Branch("Total_ion_energy_fibers",    &this->Total_ion_energy_fibers,    "Total_ion_energy_fibers/F");
+  this->GetTree()->Branch("Total_nonion_energy_fibers", &this->Total_nonion_energy_fibers, "Total_nonion_energy_fibers/F");
+  this->GetTree()->Branch("Total_ion_energy_fibers_att",&this->Total_ion_energy_fibers_att,"Total_ion_energy_fibers_att[10]/F");
+  this->GetTree()->Branch("Total_ion_energy_fibers_iX", &this->Total_ion_energy_fibers_iX, "Total_ion_energy_fibers_iX[1000]/F");
+  this->GetTree()->Branch("Total_ion_energy_fibers_iY", &this->Total_ion_energy_fibers_iY, "Total_ion_energy_fibers_iY[1000]/F");
+  this->GetTree()->Branch("Total_ion_energy_fibers_iZ", &this->Total_ion_energy_fibers_iZ, "Total_ion_energy_fibers_iZ[1000]/F");
   
   this->GetTree()->Branch("Total_energy_absorber",       &this->Total_energy_absorber,       "Total_energy_absorber/F");
   this->GetTree()->Branch("Total_ion_energy_absorber",   &this->Total_ion_energy_absorber,   "Total_ion_energy_absorber/F");
@@ -75,6 +76,9 @@ CreateTree::CreateTree(TString name, bool init_data, bool deposition, bool opPho
     this->GetTree()->Branch("depositionFineLayer",&this->depositionFineLayer);
     this->GetTree()->Branch("depositionIX",&this->depositionIX);
     this->GetTree()->Branch("depositionIY",&this->depositionIY);
+    this->GetTree()->Branch("depositionFiberLocalX",&this->depositionFiberLocalX);
+    this->GetTree()->Branch("depositionFiberLocalY",&this->depositionFiberLocalY);
+    this->GetTree()->Branch("depositionFiberLocalZ",&this->depositionFiberLocalZ);
     this->GetTree()->Branch("depositionType",&this->depositionType);
   }
   
@@ -96,6 +100,40 @@ CreateTree::CreateTree(TString name, bool init_data, bool deposition, bool opPho
     this->GetTree()->Branch("opPhoton_pX",&opPhoton_pX);
     this->GetTree()->Branch("opPhoton_pY",&opPhoton_pY);
     this->GetTree()->Branch("opPhoton_pZ",&opPhoton_pZ);
+    this->GetTree()->Branch("opPhoton_gapProb0",&opPhoton_gapProb0);
+    this->GetTree()->Branch("opPhoton_gapTime0",&opPhoton_gapTime0);
+    this->GetTree()->Branch("opPhoton_gapProb1",&opPhoton_gapProb1);
+    this->GetTree()->Branch("opPhoton_gapTime1",&opPhoton_gapTime1);
+    this->GetTree()->Branch("opPhoton_gapProb2",&opPhoton_gapProb2);
+    this->GetTree()->Branch("opPhoton_gapTime2",&opPhoton_gapTime2);
+    this->GetTree()->Branch("opPhoton_gapProb3",&opPhoton_gapProb3);
+    this->GetTree()->Branch("opPhoton_gapTime3",&opPhoton_gapTime3);
+    this->GetTree()->Branch("opPhoton_gapProb4",&opPhoton_gapProb4);
+    this->GetTree()->Branch("opPhoton_gapTime4",&opPhoton_gapTime4);
+    
+    this->GetTree()->Branch("opPhotonFast_n_gap",&this->opPhotonFast_n_gap,"opPhotonFast_n_gap/I");
+    this->GetTree()->Branch("opPhotonFast_process_gap",&opPhotonFast_process_gap);
+    this->GetTree()->Branch("opPhotonFast_trackID_gap",&opPhotonFast_trackID_gap);
+    this->GetTree()->Branch("opPhotonFast_parentTrackID_gap",&opPhotonFast_parentTrackID_gap);
+    this->GetTree()->Branch("opPhotonFast_fiberIX_gap",&opPhotonFast_fiberIX_gap);
+    this->GetTree()->Branch("opPhotonFast_fiberIY_gap",&opPhotonFast_fiberIY_gap);
+    this->GetTree()->Branch("opPhotonFast_fiberIZ_gap",&opPhotonFast_fiberIZ_gap);
+    this->GetTree()->Branch("opPhotonFast_energy_gap",&opPhotonFast_energy_gap);
+    this->GetTree()->Branch("opPhotonFast_waveLength_gap",&opPhotonFast_waveLength_gap);
+    this->GetTree()->Branch("opPhotonFast_prodTime_gap",&opPhotonFast_prodTime_gap);
+    this->GetTree()->Branch("opPhotonFast_time_gap",&opPhotonFast_time_gap);
+    
+    this->GetTree()->Branch("opPhoton_n_gap",&this->opPhoton_n_gap,"opPhoton_n_gap/I");
+    this->GetTree()->Branch("opPhoton_process_gap",&opPhoton_process_gap);
+    this->GetTree()->Branch("opPhoton_trackID_gap",&opPhoton_trackID_gap);
+    this->GetTree()->Branch("opPhoton_parentTrackID_gap",&opPhoton_parentTrackID_gap);
+    this->GetTree()->Branch("opPhoton_fiberIX_gap",&opPhoton_fiberIX_gap);
+    this->GetTree()->Branch("opPhoton_fiberIY_gap",&opPhoton_fiberIY_gap);
+    this->GetTree()->Branch("opPhoton_fiberIZ_gap",&opPhoton_fiberIZ_gap);
+    this->GetTree()->Branch("opPhoton_energy_gap",&opPhoton_energy_gap);
+    this->GetTree()->Branch("opPhoton_waveLength_gap",&opPhoton_waveLength_gap);
+    this->GetTree()->Branch("opPhoton_prodTime_gap",&opPhoton_prodTime_gap);
+    this->GetTree()->Branch("opPhoton_time_gap",&opPhoton_time_gap);
     
     this->GetTree()->Branch("opPhoton_n_det",&this->opPhoton_n_det,"opPhoton_n_det/I");
     this->GetTree()->Branch("opPhoton_process_det",&opPhoton_process_det);
@@ -106,6 +144,7 @@ CreateTree::CreateTree(TString name, bool init_data, bool deposition, bool opPho
     this->GetTree()->Branch("opPhoton_fiberIZ_det",&opPhoton_fiberIZ_det);
     this->GetTree()->Branch("opPhoton_energy_det",&opPhoton_energy_det);
     this->GetTree()->Branch("opPhoton_waveLength_det",&opPhoton_waveLength_det);
+    this->GetTree()->Branch("opPhoton_prodTime_det",&opPhoton_prodTime_det);
     this->GetTree()->Branch("opPhoton_time_det",&opPhoton_time_det);
   }
   
@@ -140,6 +179,10 @@ void CreateTree::Clear()
   Total_energy_fibers        = 0;
   Total_ion_energy_fibers    = 0;
   Total_nonion_energy_fibers = 0;
+  for(int i = 0; i < 10; ++i)
+  {
+    Total_ion_energy_fibers_att[i] = 0;
+  }
   for(int i = 0; i < 1000; ++i)
   {
     Total_ion_energy_fibers_iX[i] = 0;
@@ -198,6 +241,9 @@ void CreateTree::Clear()
     depositionFineLayer.clear();
     depositionIX.clear();
     depositionIY.clear();
+    depositionFiberLocalX.clear();
+    depositionFiberLocalY.clear();
+    depositionFiberLocalZ.clear();
     depositionType.clear();
   }
   
@@ -220,6 +266,40 @@ void CreateTree::Clear()
     opPhoton_pX.clear();
     opPhoton_pY.clear();
     opPhoton_pZ.clear();
+    opPhoton_gapProb0.clear();
+    opPhoton_gapTime0.clear();
+    opPhoton_gapProb1.clear();
+    opPhoton_gapTime1.clear();
+    opPhoton_gapProb2.clear();
+    opPhoton_gapTime2.clear();
+    opPhoton_gapProb3.clear();
+    opPhoton_gapTime3.clear();
+    opPhoton_gapProb4.clear();
+    opPhoton_gapTime4.clear();
+    
+    opPhotonFast_n_gap = 0;
+    opPhotonFast_process_gap.clear();
+    opPhotonFast_trackID_gap.clear();
+    opPhotonFast_parentTrackID_gap.clear();
+    opPhotonFast_fiberIX_gap.clear();
+    opPhotonFast_fiberIY_gap.clear();
+    opPhotonFast_fiberIZ_gap.clear();
+    opPhotonFast_energy_gap.clear();
+    opPhotonFast_waveLength_gap.clear();
+    opPhotonFast_prodTime_gap.clear();
+    opPhotonFast_time_gap.clear();
+    
+    opPhoton_n_gap = 0;
+    opPhoton_process_gap.clear();
+    opPhoton_trackID_gap.clear();
+    opPhoton_parentTrackID_gap.clear();
+    opPhoton_fiberIX_gap.clear();
+    opPhoton_fiberIY_gap.clear();
+    opPhoton_fiberIZ_gap.clear();
+    opPhoton_energy_gap.clear();
+    opPhoton_waveLength_gap.clear();
+    opPhoton_prodTime_gap.clear();
+    opPhoton_time_gap.clear();
     
     opPhoton_n_det = 0;
     opPhoton_process_det.clear();
@@ -230,6 +310,7 @@ void CreateTree::Clear()
     opPhoton_fiberIZ_det.clear();
     opPhoton_energy_det.clear();
     opPhoton_waveLength_det.clear();
+    opPhoton_prodTime_det.clear();
     opPhoton_time_det.clear();
   }
 }

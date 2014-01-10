@@ -71,14 +71,19 @@ public:
   G4double GetSpacing_xy() const { return spacing_xy; };
   G4double GetSpacing_z()  const { return spacing_z;  };
   
+  G4double GetHoleRadius()  const { return hole_radius; };
   G4double GetFiberRadius() const { return fiber_radius; };
   G4double GetFiberLength() const { return fiber_length; };
   
+  G4double GetAttLambda(const G4int& it) const { return attLambdas[it]; };
   
 public:
   G4VPhysicalVolume* Construct();
   
 private:
+  
+  void readConfigFile(string configFileName);
+  
   G4VPhysicalVolume* fAbsorberPV;   // the absorber physical volume
   
   G4VPhysicalVolume* fVHole1PV[500];   // the absorber holes
@@ -90,6 +95,24 @@ private:
   G4VPhysicalVolume* fVFiber2PV[500];   // the absorber fibers
   G4VPhysicalVolume* fHFiber1PV[500];   // the absorber fibers
   G4VPhysicalVolume* fHFiber2PV[500];   // the absorber fibers
+  
+  G4VPhysicalVolume* fVTopGapLayer1PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fVTopGapLayer2PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fVBtmGapLayer1PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fVBtmGapLayer2PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fHTopGapLayer1PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fHTopGapLayer2PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fHBtmGapLayer1PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fHBtmGapLayer2PV[500];   // the absorber fibers
+  
+  G4VPhysicalVolume* fVTopGap1PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fVTopGap2PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fVBtmGap1PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fVBtmGap2PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fHTopGap1PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fHTopGap2PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fHBtmGap1PV[500];   // the absorber fibers
+  G4VPhysicalVolume* fHBtmGap2PV[500];   // the absorber fibers
   
   G4VPhysicalVolume* fVTopWindow1PV[500];   // the absorber fibers
   G4VPhysicalVolume* fVTopWindow2PV[500];   // the absorber fibers
@@ -118,7 +141,6 @@ private:
   G4VPhysicalVolume* fHBtmDetector1PV[500];   // the absorber fibers
   G4VPhysicalVolume* fHBtmDetector2PV[500];   // the absorber fibers
   
-  
   G4double expHall_x;
   G4double expHall_y;
   G4double expHall_z;
@@ -131,6 +153,8 @@ private:
   
   G4double fiber_length;
   G4double fiber_radius;
+  G4int fiber_vertical;
+  G4int fiber_horizontal;
   int nModules_x, nModules_y;
   int nFibers_xy, nLayers_z;
   G4double spacing_xy, spacing_z;
@@ -145,19 +169,21 @@ private:
   G4double win_l;
   G4int    win_material;
   
+  G4double gap_l;
+  G4int    gap_material;
+  
   G4double det_d;
-  G4double det_distance;
   G4int    det_material;
   
   G4double depth;
   
-  void readConfigFile(string configFileName);
+  G4double attLambdas[10];
   
   //Materials
   void initializeMaterials();
   G4Material* AbMaterial;
-  G4Material* GaMaterial;
   G4Material* ScMaterial;
+  G4Material* GaMaterial;
   G4Material* WiMaterial;
   G4Material* DeMaterial;
 };

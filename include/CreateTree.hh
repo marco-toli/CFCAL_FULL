@@ -67,11 +67,15 @@ public:
   std::vector<int> depositionFineLayer;
   std::vector<int> depositionIX;
   std::vector<int> depositionIY;
+  std::vector<float> depositionFiberLocalX;
+  std::vector<float> depositionFiberLocalY;
+  std::vector<float> depositionFiberLocalZ;
   std::vector<int> depositionType;
   
   float Total_energy_fibers;
   float Total_ion_energy_fibers;
   float Total_nonion_energy_fibers;
+  float Total_ion_energy_fibers_att[10];
   float Total_ion_energy_fibers_iX[1000];
   float Total_ion_energy_fibers_iY[1000];
   float Total_ion_energy_fibers_iZ[1000];
@@ -101,6 +105,7 @@ public:
   std::vector<int> opPhoton_fiberIZ;
   std::vector<float> opPhoton_energy;
   std::vector<float> opPhoton_waveLength;
+  std::vector<float> opPhoton_prodTime;
   std::vector<float> opPhoton_time;
   std::vector<float> opPhoton_vertexX;
   std::vector<float> opPhoton_vertexY;
@@ -108,6 +113,40 @@ public:
   std::vector<float> opPhoton_pX;
   std::vector<float> opPhoton_pY;
   std::vector<float> opPhoton_pZ;
+  std::vector<float> opPhoton_gapProb0;
+  std::vector<float> opPhoton_gapTime0;
+  std::vector<float> opPhoton_gapProb1;
+  std::vector<float> opPhoton_gapTime1;
+  std::vector<float> opPhoton_gapProb2;
+  std::vector<float> opPhoton_gapTime2;
+  std::vector<float> opPhoton_gapProb3;
+  std::vector<float> opPhoton_gapTime3;
+  std::vector<float> opPhoton_gapProb4;
+  std::vector<float> opPhoton_gapTime4;
+  
+  int opPhotonFast_n_gap;
+  std::vector<int> opPhotonFast_process_gap;
+  std::vector<int> opPhotonFast_trackID_gap;
+  std::vector<int> opPhotonFast_parentTrackID_gap;
+  std::vector<int> opPhotonFast_fiberIX_gap;
+  std::vector<int> opPhotonFast_fiberIY_gap;
+  std::vector<int> opPhotonFast_fiberIZ_gap;
+  std::vector<float> opPhotonFast_energy_gap;
+  std::vector<float> opPhotonFast_waveLength_gap;
+  std::vector<float> opPhotonFast_prodTime_gap;
+  std::vector<float> opPhotonFast_time_gap;
+  
+  int opPhoton_n_gap;
+  std::vector<int> opPhoton_process_gap;
+  std::vector<int> opPhoton_trackID_gap;
+  std::vector<int> opPhoton_parentTrackID_gap;
+  std::vector<int> opPhoton_fiberIX_gap;
+  std::vector<int> opPhoton_fiberIY_gap;
+  std::vector<int> opPhoton_fiberIZ_gap;
+  std::vector<float> opPhoton_energy_gap;
+  std::vector<float> opPhoton_waveLength_gap;
+  std::vector<float> opPhoton_prodTime_gap;
+  std::vector<float> opPhoton_time_gap;
   
   int opPhoton_n_det;
   std::vector<int> opPhoton_process_det;
@@ -118,6 +157,7 @@ public:
   std::vector<int> opPhoton_fiberIZ_det;
   std::vector<float> opPhoton_energy_det;
   std::vector<float> opPhoton_waveLength_det;
+  std::vector<float> opPhoton_prodTime_det;
   std::vector<float> opPhoton_time_det;
 };
 

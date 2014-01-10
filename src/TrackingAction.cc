@@ -58,12 +58,12 @@ void TrackingAction::PostUserTrackingAction(const G4Track* aTrack)
     {
       G4Track* secTrack = (*secondaries)[i];
       
-      TrackInformation* newTrackInfo = new TrackInformation((*secondaries)[i]);
+      TrackInformation* newTrackInfo = new TrackInformation(secTrack);
       newTrackInfo -> SetParentInformation( aTrackInfo );
+      newTrackInfo -> SetParticleProdTimeInformation( secTrack->GetGlobalTime()/picosecond );
       secTrack -> SetUserInformation( newTrackInfo );
     }
   }
-  
   
   if( (aTrackInfo->GetParticleName() == "gamma" && aTrackInfo->GetParentName() == "pi0") ||
       (aTrackInfo->GetParticleName() == "e-"    && aTrackInfo->GetParentName() == "pi0") ||

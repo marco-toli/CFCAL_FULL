@@ -69,6 +69,7 @@
 #include "EventAction.hh"
 #include "SteppingVerbose.hh"
 #include "CreateTree.hh"
+#include "LedFiberTiming.hh"
 
 #ifdef G4VIS_USE
 #include "G4VisExecutive.hh"
@@ -146,8 +147,8 @@ int main(int argc,char** argv)
   
   
   G4bool init_data   = 1;
-  G4bool deposition  = 0;
-  G4bool opPhotons   = 0;
+  G4bool deposition  = 1;
+  G4bool opPhotons   = 1;
   G4bool timing      = 0;
   CreateTree* mytree = new CreateTree("tree", init_data, deposition, opPhotons, timing);
   
@@ -183,6 +184,15 @@ int main(int argc,char** argv)
   }
   
   std::cout << "Using physics list: " << physName << std::endl; 
+  
+  
+  // Fast photon timing
+  //
+  
+  G4double fiber_length = config.read<double>("fiber_length");
+  G4double fiber_radius = config.read<double>("fiber_radius");
+  Fiber vFib = FiberInit(fiber_length,fiber_radius,400.,true);
+  Fiber hFib = FiberInit(fiber_length,fiber_radius,400.,false);
   
   
   // UserInitialization classes - mandatory
@@ -224,7 +234,7 @@ int main(int argc,char** argv)
   G4cout << ">>> Define TrackingAction::end <<<" << G4endl;
   
   G4cout << ">>> Define SteppingAction::begin <<<" << G4endl; 
-  SteppingAction* stepping_action = new SteppingAction(detector);
+  SteppingAction* stepping_action = new SteppingAction(detector,&vFib,&hFib);
   runManager->SetUserAction(stepping_action); 
   G4cout << ">>> Define SteppingAction::end <<<" << G4endl;
   
