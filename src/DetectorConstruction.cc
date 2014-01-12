@@ -55,7 +55,6 @@ DetectorConstruction::DetectorConstruction(const string& configFileName)
 {
   readConfigFile(configFileName);
   
-  if( nLayers_z%2 ==1 ) nLayers_z += 1;
   
   
   //---------------------------------------
@@ -66,20 +65,61 @@ DetectorConstruction::DetectorConstruction(const string& configFileName)
   
   expHall_x = expHall_y = expHall_z = 10*m;
   
-  hole_radius = fiber_radius + 0.1*mm;
+  hole_radius = fiber_radius + 0.5*mm;
   
-  module_x = fiber_length + 2.*(depth + gap_l + win_l + depth + det_d);
-  module_y = fiber_length + 2.*(depth + gap_l + win_l + depth + det_d);
+  if( fiber_x )
+  {
+    module_y = fiber_length + 2.*(depth + gap_l + win_l + depth + det_d);
+    activeArea_y = fiber_length;
+  }
+  else
+  {
+    module_y = (nFibers_y-0.5)*fiber_spacing_xy + 2.*hole_radius;
+    activeArea_y = module_y;
+    if( 0.5* det_d > hole_radius ) module_y += 2.*(0.5*det_d-hole_radius);
+  }
+  
+  if( fiber_y )
+  {
+    module_x = fiber_length + 2.*(depth + gap_l + win_l + depth + det_d);
+    activeArea_x = fiber_length;
+  }
+  else
+  {
+    module_x = (nFibers_x-0.5)*fiber_spacing_xy + 2.*hole_radius;
+    activeArea_x = module_x;
+    if( 0.5* det_d > hole_radius ) module_x += 2.*(0.5*det_d-hole_radius);
+  }
+  
+  nFibers_x = int(activeArea_x / fiber_spacing_xy - 0.5) + 1;
+  nFibers_y = int(activeArea_y / fiber_spacing_xy - 0.5) + 1;
+  spacing_x = 2. * ( (activeArea_x-2.*hole_radius)/(2.*nFibers_x-1.) );
+  spacing_y = 2. * ( (activeArea_y-2.*hole_radius)/(2.*nFibers_y-1.) );
+
+  if( nLayers_z%2 ==1 ) nLayers_z += 1;
+  spacing_z = fiber_spacing_z;
   module_z = (nLayers_z) * spacing_z;
   
-  nFibers_xy = int(fiber_length / spacing_xy);
-  spacing_xy = 2. * ((fiber_length-2.*hole_radius) / (2.*nFibers_xy-1.) );
+  offset_z = fiber_offset_z;
+  if( offset_z > +1.*(0.5*spacing_z-hole_radius) ) offset_z = +1. * (0.5*spacing_z-hole_radius);
+  if( offset_z < -1.*(0.5*spacing_z-hole_radius) ) offset_z = -1. * (0.5*spacing_z-hole_radius);
+  if( fiber_x && fiber_y && offset_z < hole_radius ) offset_z = hole_radius;
+  
+  
+  calor_x = nModules_x * module_x;
+  calor_y = nModules_y * module_y;
+  calor_z = module_z;
   
   G4cout << "\n------------------------------------------------------------"
          << "\n---> The calorimeter is " << nLayers_z << " layers of: " << G4endl;
-  G4cout << "absorber: " << spacing_z/mm << " mm of " << AbMaterial->GetName() << G4endl;
-  G4cout << "fibers: "   << nFibers_xy << " fibers along the x/y axis with a spacing of "<< spacing_xy/mm << " mm" << G4endl;
-  G4cout << "\n------------------------------------------------------------\n" << G4endl;
+  G4cout << "------> absorber: " << spacing_z/mm << " mm of " << AbMaterial->GetName() << G4endl;
+  if( fiber_x )
+    G4cout << "------>   fibers: "   << nFibers_x << " vertical fibers (along the y axis) with a spacing of "<< spacing_x/mm << " mm" << G4endl;
+  if( fiber_y )
+    G4cout << "------>   fibers: "   << nFibers_y << " horizontal fibers (along the x axis) with a spacing of "<< spacing_y/mm << " mm" << G4endl;
+  G4cout << "---> The total calorimeter dimensions are [" << calor_x << " x " << calor_y << " x " << calor_z << "] mm " << G4endl;
+  G4cout << "---> The total active area dimensions are [" << activeArea_x << " x " << activeArea_y << " x " << calor_z << "] mm " << G4endl;
+  G4cout << "------------------------------------------------------------\n" << G4endl;
 }
 
 
@@ -116,13 +156,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
   
   // The calorimeter
-  G4VSolid* calorS = new G4Box("Calorimeter",0.5*module_x*nModules_x,0.5*module_y*nModules_y,0.5*module_z);
+  G4VSolid* calorS = new G4Box("Calorimeter",0.5*calor_x,0.5*calor_y,0.5*calor_z);
   G4LogicalVolume* calorLV = new G4LogicalVolume(calorS,MyMaterials::Air(),"Calorimeter");
   new G4PVPlacement(0,G4ThreeVector(),calorLV,"Calorimeter",worldLV,false,0,true);
   
   
   // Matrix
-  G4VSolid* matrixS = new G4Box("Matrix",0.5*module_x*nModules_x,0.5*module_y,0.5*module_z);
+  G4VSolid* matrixS = new G4Box("Matrix",0.5*calor_x,0.5*module_y,0.5*module_z);
   G4LogicalVolume* matrixLV = new G4LogicalVolume(matrixS,MyMaterials::Air(),"Matrix");
   new G4PVReplica("Matrix",matrixLV,calorLV,kYAxis,nModules_y,module_y);
   
@@ -140,7 +180,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
   
   // Absorber
-  G4VSolid* absorberS = new G4Box("Absorber",0.5*fiber_length,0.5*fiber_length,spacing_z);
+  G4VSolid* absorberS = new G4Box("Absorber",0.5*activeArea_x,0.5*activeArea_y,spacing_z);
   G4LogicalVolume* absorberLV = new G4LogicalVolume(absorberS,AbMaterial,"Absorber");
   fAbsorberPV = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.),absorberLV,"Absorber",layerLV,false,0,true);
   
@@ -149,32 +189,34 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4VSolid* holeS = new G4Tubs("Hole",fiber_radius,hole_radius,0.5*fiber_length,0.*deg,360.*deg);
   G4LogicalVolume* holeLV = new G4LogicalVolume(holeS,MyMaterials::Air(),"Hole");
   
-  for(int iX = 0; iX < nFibers_xy; ++iX)
+  if( fiber_x )
   {
-    G4double x1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
-    G4double x2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
-    G4double y1 = 0.;
-    G4double y2 = 0.;
-    G4double z1 = -0.5*spacing_z - 2.;
-    G4double z2 = +0.5*spacing_z - 2.;
-    
-    if( fiber_vertical )
+    for(int iX = 0; iX < nFibers_x; ++iX)
     {
+      G4double x1 = -0.5*activeArea_x + hole_radius + iX*spacing_x;
+      G4double x2 = -0.5*activeArea_x+ hole_radius + (iX+0.5)*spacing_x;
+      G4double y1 = 0.;
+      G4double y2 = 0.;
+      G4double z1 = -0.5*spacing_z - offset_z;
+      G4double z2 = +0.5*spacing_z - offset_z;
+      
       fVHole1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),holeLV,"vHole1",absorberLV,false,0,false);
       fVHole2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),holeLV,"vHole2",absorberLV,false,0,false);
     }
-    
-    x1 = 0.;
-    x2 = 0.;
-    y1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
-    y2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
-    z1 = -0.5*spacing_z + 2.;
-    z2 = +0.5*spacing_z + 2.;
-    
-    if( fiber_horizontal )
+  }
+  if( fiber_y )
+  {
+    for(int iY = 0; iY < nFibers_y; ++iY)
     {
-      fHHole1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),holeLV,"hHole1",absorberLV,false,0,false);
-      fHHole2PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),holeLV,"hHole2",absorberLV,false,0,false);    
+      G4double x1 = 0.;
+      G4double x2 = 0.;
+      G4double y1 = -0.5*activeArea_y + hole_radius + iY*spacing_y;
+      G4double y2 = -0.5*activeArea_y + hole_radius + (iY+0.5)*spacing_y;
+      G4double z1 = -0.5*spacing_z + offset_z;
+      G4double z2 = +0.5*spacing_z + offset_z;
+      
+      fHHole1PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),holeLV,"hHole1",absorberLV,false,0,false);
+      fHHole2PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),holeLV,"hHole2",absorberLV,false,0,false);    
     }
   }
   
@@ -183,32 +225,34 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4VSolid* fiberS = new G4Tubs("Fiber",0.,fiber_radius,0.5*fiber_length,0.*deg,360.*deg);
   G4LogicalVolume* fiberLV = new G4LogicalVolume(fiberS,ScMaterial,"Fiber");
   
-  for(int iX = 0; iX < nFibers_xy; ++iX)
+  if( fiber_x )
   {
-    G4double x1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
-    G4double x2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
-    G4double y1 = 0.;
-    G4double y2 = 0.;
-    G4double z1 = -0.5*spacing_z - 2.;
-    G4double z2 = +0.5*spacing_z - 2.;
-    
-    if( fiber_vertical )
+    for(int iX = 0; iX < nFibers_x; ++iX)
     {
+      G4double x1 = -0.5*activeArea_x + hole_radius + iX*spacing_x;
+      G4double x2 = -0.5*activeArea_x + hole_radius + (iX+0.5)*spacing_x;
+      G4double y1 = 0.;
+      G4double y2 = 0.;
+      G4double z1 = -0.5*spacing_z - offset_z;
+      G4double z2 = +0.5*spacing_z - offset_z;
+      
       fVFiber1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),fiberLV,"vFiber1",absorberLV,false,0,false);
       fVFiber2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),fiberLV,"vFiber2",absorberLV,false,0,false);
     }
-    
-    x1 = 0.;
-    x2 = 0.;
-    y1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
-    y2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
-    z1 = -0.5*spacing_z + 2.;
-    z2 = +0.5*spacing_z + 2.;
-    
-    if( fiber_horizontal )
+  }
+  if( fiber_y )
+  {
+    for(int iY = 0; iY < nFibers_y; ++iY)
     {
-      fHFiber1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),fiberLV,"hFiber1",absorberLV,false,0,false);
-      fHFiber2PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),fiberLV,"hFiber2",absorberLV,false,0,false);
+      G4double x1 = 0.;
+      G4double x2 = 0.;
+      G4double y1 = -0.5*activeArea_y + hole_radius + iY*spacing_y;
+      G4double y2 = -0.5*activeArea_y + hole_radius + (iY+0.5)*spacing_y;
+      G4double z1 = -0.5*spacing_z + offset_z;
+      G4double z2 = +0.5*spacing_z + offset_z;
+      
+      fHFiber1PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),fiberLV,"hFiber1",absorberLV,false,0,false);
+      fHFiber2PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),fiberLV,"hFiber2",absorberLV,false,0,false);
     }
   }
   
@@ -226,69 +270,70 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     gapLayerLV = new G4LogicalVolume(gapLayerS,GaMaterial,"GapLayer");
     gapLV      = new G4LogicalVolume(gapS,     GaMaterial,"Gap");
     
-    for(int iX = 0; iX < nFibers_xy; ++iX)
+    if( fiber_x )
     {
-      G4double x1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
-      G4double x2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
-      G4double y1 = 0.5*fiber_length + 0.5*depth;
-      G4double y2 = 0.5*fiber_length + 0.5*depth;
-      G4double z1 = -0.5*spacing_z - 2.;
-      G4double z2 = +0.5*spacing_z - 2.;
-      
-      if( fiber_vertical )
+      for(int iX = 0; iX < nFibers_x; ++iX)
       {
-        fVTopGapLayer1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),gapLayerLV,"vGapLayer1",layerLV,false,0,false);
-        fVTopGapLayer2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),gapLayerLV,"vGapLayer2",layerLV,false,0,false);
+        G4double x1 = -0.5*activeArea_x + hole_radius + iX*spacing_x;
+        G4double x2 = -0.5*activeArea_x + hole_radius + (iX+0.5)*spacing_x;
+        G4double y1 = 0.5*activeArea_y + 0.5*depth;
+        G4double y2 = 0.5*activeArea_y + 0.5*depth;
+        G4double z1 = -0.5*spacing_z - offset_z;
+        G4double z2 = +0.5*spacing_z - offset_z;
+        
+        fVTopGapLayer1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),gapLayerLV,"vTopGapLayer1",layerLV,false,0,false);
+        fVTopGapLayer2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),gapLayerLV,"vTopGapLayer2",layerLV,false,0,false);
         
         y1 *= -1.;
         y2 *= -1.;
         
-        fVBtmGapLayer1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),gapLayerLV,"vGapLayer1",layerLV,false,0,false);
-        fVBtmGapLayer2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),gapLayerLV,"vGapLayer2",layerLV,false,0,false);
+        fVBtmGapLayer1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),gapLayerLV,"vBtmGapLayer1",layerLV,false,0,false);
+        fVBtmGapLayer2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),gapLayerLV,"vBtmGapLayer2",layerLV,false,0,false);
         
         y1 = 0.5*fiber_length + depth + 0.5*(gap_l-depth);
         y2 = 0.5*fiber_length + depth + 0.5*(gap_l-depth);
         
-        fVTopGap1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),gapLV,"vGap1",layerLV,false,0,false);
-        fVTopGap2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),gapLV,"vGap2",layerLV,false,0,false);
+        fVTopGap1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),gapLV,"vTopGap1",layerLV,false,0,false);
+        fVTopGap2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),gapLV,"vTopGap2",layerLV,false,0,false);
         
         y1 *= -1.;
         y2 *= -1.;
         
-        fVBtmGap1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),gapLV,"vGap1",layerLV,false,0,false);
-        fVBtmGap2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),gapLV,"vGap2",layerLV,false,0,false);
+        fVBtmGap1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),gapLV,"vBtmGap1",layerLV,false,0,false);
+        fVBtmGap2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),gapLV,"vBtmGap2",layerLV,false,0,false);
       }
-      
-      
-      x1 = 0.5*fiber_length + 0.5*depth;
-      x2 = 0.5*fiber_length + 0.5*depth;
-      y1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
-      y2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
-      z1 = -0.5*spacing_z + 2.;
-      z2 = +0.5*spacing_z + 2.;
-      
-      if( fiber_horizontal )
+    }
+    if( fiber_y )
+    {
+      for(int iY = 0; iY < nFibers_y; ++iY)
       {
-        fHTopGapLayer1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),gapLayerLV,"hGapLayer1",layerLV,false,0,false);
-        fHTopGapLayer2PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),gapLayerLV,"hGapLayer2",layerLV,false,0,false);
+        G4double x1 = 0.5*activeArea_x + 0.5*depth;
+        G4double x2 = 0.5*activeArea_x + 0.5*depth;
+        G4double y1 = -0.5*activeArea_y + hole_radius + iY*spacing_y;
+        G4double y2 = -0.5*activeArea_y + hole_radius + (iY+0.5)*spacing_y;
+        G4double z1 = -0.5*spacing_z + offset_z;
+        G4double z2 = +0.5*spacing_z + offset_z;
+        
+        fHTopGapLayer1PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),gapLayerLV,"hTopGapLayer1",layerLV,false,0,false);
+        fHTopGapLayer2PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),gapLayerLV,"hTopGapLayer2",layerLV,false,0,false);
         
         x1 *= -1.;
         x2 *= -1.;
         
-        fHBtmGapLayer1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),gapLayerLV,"hGapLayer1",layerLV,false,0,false);
-        fHBtmGapLayer2PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),gapLayerLV,"hGapLayer2",layerLV,false,0,false);
+        fHBtmGapLayer1PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),gapLayerLV,"hBtmGapLayer1",layerLV,false,0,false);
+        fHBtmGapLayer2PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),gapLayerLV,"hBtmGapLayer2",layerLV,false,0,false);
         
         x1 = 0.5*fiber_length + depth + 0.5*(gap_l-depth);
         x2 = 0.5*fiber_length + depth + 0.5*(gap_l-depth);
         
-        fHTopGap1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),gapLV,"hGap1",layerLV,false,0,false);
-        fHTopGap2PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),gapLV,"hGap2",layerLV,false,0,false);
+        fHTopGap1PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),gapLV,"hTopGap1",layerLV,false,0,false);
+        fHTopGap2PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),gapLV,"hTopGap2",layerLV,false,0,false);
         
         x1 *= -1.;
         x2 *= -1.;
         
-        fHBtmGap1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),gapLV,"hGap1",layerLV,false,0,false);
-        fHBtmGap2PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),gapLV,"hGap2",layerLV,false,0,false);
+        fHBtmGap1PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),gapLV,"hBtmGap1",layerLV,false,0,false);
+        fHBtmGap2PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),gapLV,"hBtmGap2",layerLV,false,0,false);
       }
     }
   }
@@ -298,44 +343,46 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4VSolid* windowS = new G4Tubs("Window",0.0,win_r,0.5*win_l,0.*deg,360.*deg);
   G4LogicalVolume* windowLV = new G4LogicalVolume(windowS,WiMaterial,"Window");
   
-  for(int iX = 0; iX < nFibers_xy; ++iX)
+  if( fiber_x )
   {
-    G4double x1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
-    G4double x2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
-    G4double y1 = 0.5*fiber_length + gap_l + 0.5*win_l;
-    G4double y2 = 0.5*fiber_length + gap_l + 0.5*win_l;
-    G4double z1 = -0.5*spacing_z - 2.;
-    G4double z2 = +0.5*spacing_z - 2.;
-    
-    if( fiber_vertical )
+    for(int iX = 0; iX < nFibers_x; ++iX)
     {
-      fVTopWindow1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),windowLV,"vWindow1",layerLV,false,0,false);
-      fVTopWindow2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),windowLV,"vWindow2",layerLV,false,0,false);
+      G4double x1 = -0.5*activeArea_x + hole_radius + iX*spacing_x;
+      G4double x2 = -0.5*activeArea_x + hole_radius + (iX+0.5)*spacing_x;
+      G4double y1 = 0.5*activeArea_y + gap_l + 0.5*win_l;
+      G4double y2 = 0.5*activeArea_y + gap_l + 0.5*win_l;
+      G4double z1 = -0.5*spacing_z - offset_z;
+      G4double z2 = +0.5*spacing_z - offset_z;
+      
+      fVTopWindow1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),windowLV,"vTopWindow1",layerLV,false,0,false);
+      fVTopWindow2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),windowLV,"vTopWindow2",layerLV,false,0,false);
       
       y1 *= -1.;
       y2 *= -1.;
       
-      fVBtmWindow1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),windowLV,"vWindow1",layerLV,false,0,false);
-      fVBtmWindow2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),windowLV,"vWindow2",layerLV,false,0,false);
+      fVBtmWindow1PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x1,y1,z1),windowLV,"vBtmWindow1",layerLV,false,0,false);
+      fVBtmWindow2PV[iX] = new G4PVPlacement(halfPiRotX,G4ThreeVector(x2,y2,z2),windowLV,"vBtmWindow2",layerLV,false,0,false);
     }  
-    
-    x1 = 0.5*fiber_length + gap_l + 0.5*win_l;
-    x2 = 0.5*fiber_length + gap_l + 0.5*win_l;
-    y1 = -0.5*fiber_length + hole_radius + iX*spacing_xy;
-    y2 = -0.5*fiber_length + hole_radius + (iX+0.5)*spacing_xy;
-    z1 = -0.5*spacing_z + 2.;
-    z2 = +0.5*spacing_z + 2.;
-    
-    if( fiber_horizontal )
+  }
+  if( fiber_y )
+  {
+    for(int iY = 0; iY < nFibers_y; ++iY)
     {
-      fHTopWindow1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),windowLV,"hWindow1",layerLV,false,0,false);
-      fHTopWindow2PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),windowLV,"hWindow2",layerLV,false,0,false);
+      G4double x1 = 0.5*activeArea_x + gap_l + 0.5*win_l;
+      G4double x2 = 0.5*activeArea_x + gap_l + 0.5*win_l;
+      G4double y1 = -0.5*activeArea_y + hole_radius + iY*spacing_y;
+      G4double y2 = -0.5*activeArea_y + hole_radius + (iY+0.5)*spacing_y;
+      G4double z1 = -0.5*spacing_z + offset_z;
+      G4double z2 = +0.5*spacing_z + offset_z;
+      
+      fHTopWindow1PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),windowLV,"hTopWindow1",layerLV,false,0,false);
+      fHTopWindow2PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),windowLV,"hTopWindow2",layerLV,false,0,false);
       
       x1 *= -1.;
       x2 *= -1.;
       
-      fHBtmWindow1PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),windowLV,"hWindow1",layerLV,false,0,false);
-      fHBtmWindow2PV[iX] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),windowLV,"hWindow2",layerLV,false,0,false);
+      fHBtmWindow1PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x1,y1,z1),windowLV,"hBtmWindow1",layerLV,false,0,false);
+      fHBtmWindow2PV[iY] = new G4PVPlacement(halfPiRotY,G4ThreeVector(x2,y2,z2),windowLV,"hBtmWindow2",layerLV,false,0,false);
     }
   }
   
@@ -346,17 +393,17 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4LogicalVolume* detectorLV = new G4LogicalVolume(detectorS,DeMaterial,"Detector");
   G4LogicalVolume* detLayerLV = new G4LogicalVolume(detLayerS,DeMaterial,"DetLayer");
   
-  for(int iX = 0; iX < nFibers_xy; ++iX)
+  if( fiber_x )
   {
-    G4double x1 = -0.5*fiber_length + hole_radius+iX*spacing_xy;
-    G4double x2 = -0.5*fiber_length + hole_radius+(iX+0.5)*spacing_xy;
-    G4double y1 = 0.5*fiber_length + gap_l + win_l + 0.5*depth;
-    G4double y2 = 0.5*fiber_length + gap_l + win_l + 0.5*depth;
-    G4double z1 = -0.5*spacing_z -2.;
-    G4double z2 = +0.5*spacing_z -2.;
-    
-    if( fiber_vertical )
+    for(int iX = 0; iX < nFibers_x; ++iX)
     {
+      G4double x1 = -0.5*activeArea_x + hole_radius+iX*spacing_x;
+      G4double x2 = -0.5*activeArea_x + hole_radius+(iX+0.5)*spacing_x;
+      G4double y1 = 0.5*activeArea_y + gap_l + win_l + 0.5*depth;
+      G4double y2 = 0.5*activeArea_y + gap_l + win_l + 0.5*depth;
+      G4double z1 = -0.5*spacing_z -offset_z;
+      G4double z2 = +0.5*spacing_z -offset_z;
+    
       fVTopDetLayer1PV[iX] = new G4PVPlacement(0,G4ThreeVector(x1,y1,z1),detLayerLV,"vTopDetLayer1",layerLV,false,0,false);
       fVTopDetLayer2PV[iX] = new G4PVPlacement(0,G4ThreeVector(x2,y2,z2),detLayerLV,"vTopDetLayer2",layerLV,false,0,false);
       
@@ -366,8 +413,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
       fVBtmDetLayer1PV[iX] = new G4PVPlacement(0,G4ThreeVector(x1,y1,z1),detLayerLV,"vBtmDetLayer1",layerLV,false,0,false);
       fVBtmDetLayer2PV[iX] = new G4PVPlacement(0,G4ThreeVector(x2,y2,z2),detLayerLV,"vBtmDetLayer2",layerLV,false,0,false);
       
-      y1 = 0.5*fiber_length + gap_l + win_l + depth + 0.5*det_d;
-      y2 = 0.5*fiber_length + gap_l + win_l + depth + 0.5*det_d;
+      y1 = 0.5*activeArea_y + gap_l + win_l + depth + 0.5*det_d;
+      y2 = 0.5*activeArea_y + gap_l + win_l + depth + 0.5*det_d;
       
       fVTopDetector1PV[iX] = new G4PVPlacement(0,G4ThreeVector(x1,y1,z1),detectorLV,"vTopDetector1",layerLV,false,0,false);
       fVTopDetector2PV[iX] = new G4PVPlacement(0,G4ThreeVector(x2,y2,z2),detectorLV,"vTopDetector2",layerLV,false,0,false);
@@ -378,40 +425,85 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
       fVBtmDetector1PV[iX] = new G4PVPlacement(0,G4ThreeVector(x1,y1,z1),detectorLV,"vBtmDetector1",layerLV,false,0,false);
       fVBtmDetector2PV[iX] = new G4PVPlacement(0,G4ThreeVector(x2,y2,z2),detectorLV,"vBtmDetector2",layerLV,false,0,false);
     }
-    
-    
-    x1 = 0.5*fiber_length + gap_l + win_l + 0.5*depth;
-    x2 = 0.5*fiber_length + gap_l + win_l + 0.5*depth;
-    y1 = -0.5*fiber_length + hole_radius+iX*spacing_xy;
-    y2 = -0.5*fiber_length + hole_radius+(iX+0.5)*spacing_xy;
-    z1 = -0.5*spacing_z + 2.;
-    z2 = +0.5*spacing_z + 2.;
-    
-    if( fiber_horizontal )
+  }
+  if( fiber_y )
+  {    
+    for(int iY = 0; iY < nFibers_y; ++iY)
     {
-      fHTopDetLayer1PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detLayerLV,"hTopDetLayer1",layerLV,false,0,false);
-      fHTopDetLayer2PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detLayerLV,"hTopDetLayer2",layerLV,false,0,false);
+      G4double x1 = 0.5*activeArea_x + gap_l + win_l + 0.5*depth;
+      G4double x2 = 0.5*activeArea_x + gap_l + win_l + 0.5*depth;
+      G4double y1 = -0.5*activeArea_y + hole_radius+iY*spacing_y;
+      G4double y2 = -0.5*activeArea_y + hole_radius+(iY+0.5)*spacing_y;
+      G4double z1 = -0.5*spacing_z + offset_z;
+      G4double z2 = +0.5*spacing_z + offset_z;
+      
+      fHTopDetLayer1PV[iY] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detLayerLV,"hTopDetLayer1",layerLV,false,0,false);
+      fHTopDetLayer2PV[iY] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detLayerLV,"hTopDetLayer2",layerLV,false,0,false);
       
       x1 *= -1.;
       x2 *= -1.;
       
-      fHBtmDetLayer1PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detLayerLV,"hBtmDetLayer1",layerLV,false,0,false);
-      fHBtmDetLayer2PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detLayerLV,"hBtmDetLayer2",layerLV,false,0,false);
+      fHBtmDetLayer1PV[iY] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detLayerLV,"hBtmDetLayer1",layerLV,false,0,false);
+      fHBtmDetLayer2PV[iY] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detLayerLV,"hBtmDetLayer2",layerLV,false,0,false);
       
-      x1 = 0.5*fiber_length + gap_l + win_l + depth + 0.5*det_d;
-      x2 = 0.5*fiber_length + gap_l + win_l + depth + 0.5*det_d;
+      x1 = 0.5*activeArea_x + gap_l + win_l + depth + 0.5*det_d;
+      x2 = 0.5*activeArea_x + gap_l + win_l + depth + 0.5*det_d;
       
-      fHTopDetector1PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detectorLV,"hTopDetector1",layerLV,false,0,false);
-      fHTopDetector2PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detectorLV,"hTopDetector2",layerLV,false,0,false);
+      fHTopDetector1PV[iY] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detectorLV,"hTopDetector1",layerLV,false,0,false);
+      fHTopDetector2PV[iY] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detectorLV,"hTopDetector2",layerLV,false,0,false);
       
       x1 *= -1.;
       x2 *= -1.;
       
-      fHBtmDetector1PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detectorLV,"hBtmDetector1",layerLV,false,0,false);
-      fHBtmDetector2PV[iX] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detectorLV,"hBtmDetector2",layerLV,false,0,false);
+      fHBtmDetector1PV[iY] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x1,y1,z1),detectorLV,"hBtmDetector1",layerLV,false,0,false);
+      fHBtmDetector2PV[iY] = new G4PVPlacement(halfPiRotZ,G4ThreeVector(x2,y2,z2),detectorLV,"hBtmDetector2",layerLV,false,0,false);
     }
   }
   
+  
+  // Preshower
+  G4VSolid* preshowerS = NULL;
+  G4LogicalVolume* preshowerLV = NULL;
+  
+  if( preshower_l > 0 )
+  {
+    G4double preshower_x = nModules_x * module_x;
+    G4double preshower_y = nModules_y * module_y;
+    
+    preshowerS = new G4Box("Preshower",0.5*preshower_x,0.5*preshower_y,0.5*preshower_l);
+    preshowerLV = new G4LogicalVolume(preshowerS,PreMaterial,"Preshower");
+    fPreshowerPV = new G4PVPlacement(0,G4ThreeVector(0.,0.,-0.5*(module_z+preshower_l)),preshowerLV,"Preshower",worldLV,false,0,true);
+  }
+  
+  
+  // Postshower
+  G4VSolid* postshowerS = NULL;
+  G4LogicalVolume* postshowerLV = NULL;
+  
+  if( postshower_l > 0 )
+  {
+    G4double postshower_x = nModules_x * module_x;
+    G4double postshower_y = nModules_y * module_y;
+    
+    postshowerS = new G4Box("Postshower",0.5*postshower_x,0.5*postshower_y,0.5*postshower_l);
+    postshowerLV = new G4LogicalVolume(postshowerS,PostMaterial,"Postshower");
+    fPostshowerPV = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.5*(postshower_l+calor_z)),postshowerLV,"Postshower",worldLV,false,0,true);
+  }
+  
+  
+  // Sideshower
+  G4VSolid* sideshowerS = NULL;
+  G4LogicalVolume* sideshowerLV = NULL;
+  
+  if( sideshower_w > 0 )
+  {
+    G4VSolid* dummy1 = new G4Box("dummy1",0.5*calor_x+sideshower_w,0.5*calor_y+sideshower_w,0.5*(calor_z+sideshower_l));
+    G4VSolid* dummy2 = new G4Box("dummy2",0.5*calor_x,0.5*calor_y,module_z+sideshower_l);
+    
+    sideshowerS = new G4SubtractionSolid("Sideshower",dummy1,dummy2);
+    sideshowerLV = new G4LogicalVolume(sideshowerS,SideMaterial,"Sideshower");
+    fSideshowerPV = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.5*sideshower_l),sideshowerLV,"Sideshower",worldLV,false,0,true);
+  }
   
   
   //-----------------------------------------------------
@@ -476,8 +568,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   VisAttAbsorber->SetForceWireframe(true);
   absorberLV->SetVisAttributes(VisAttAbsorber);
   
-  G4VisAttributes* VisAttHole = new G4VisAttributes(blue);
-  VisAttHole->SetVisibility(false);
+  G4VisAttributes* VisAttHole = new G4VisAttributes(brass);
+  VisAttHole->SetVisibility(true);
   VisAttHole->SetForceWireframe(false);
   holeLV->SetVisAttributes(VisAttHole);
   
@@ -514,6 +606,30 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   VisAttDetector->SetForceWireframe(false);
   detectorLV->SetVisAttributes(VisAttDetector);
   
+  if( preshower_l > 0 )
+  {
+    G4VisAttributes* VisAttPreshower = new G4VisAttributes(gray);
+    VisAttPreshower->SetVisibility(true);
+    VisAttPreshower->SetForceWireframe(false);
+    preshowerLV->SetVisAttributes(VisAttPreshower);
+  }
+  
+  if( postshower_l > 0 )
+  {
+    G4VisAttributes* VisAttPostshower = new G4VisAttributes(gray);
+    VisAttPostshower->SetVisibility(true);
+    VisAttPostshower->SetForceWireframe(false);
+    postshowerLV->SetVisAttributes(VisAttPostshower);
+  }
+  
+  if( sideshower_w > 0 )
+  {
+    G4VisAttributes* VisAttSideshower = new G4VisAttributes(gray);
+    VisAttSideshower->SetVisibility(true);
+    VisAttSideshower->SetForceWireframe(true);
+    sideshowerLV->SetVisAttributes(VisAttSideshower);
+  }
+  
   
   
   G4cout << ">>>>>> DetectorConstruction::Construct()::end <<< " << G4endl;
@@ -535,10 +651,13 @@ void DetectorConstruction::readConfigFile(string configFileName)
   
   config.readInto(fiber_radius,"fiber_radius");
   config.readInto(fiber_length,"fiber_length");
-  config.readInto(fiber_vertical,"fiber_vertical");
-  config.readInto(fiber_horizontal,"fiber_horizontal");
-  config.readInto(spacing_xy,"spacing_xy");
-  config.readInto(spacing_z,"spacing_z");
+  config.readInto(fiber_spacing_xy,"fiber_spacing_xy");
+  config.readInto(fiber_spacing_z,"fiber_spacing_z");
+  config.readInto(fiber_offset_z,"fiber_offset_z");
+  config.readInto(fiber_x,"fiber_x");
+  config.readInto(fiber_y,"fiber_y");
+  config.readInto(nFibers_x,"nFibers_x");
+  config.readInto(nFibers_y,"nFibers_y");
   config.readInto(nModules_x,"nModules_x");
   config.readInto(nModules_y,"nModules_y");
   config.readInto(nLayers_z,"nLayers_z");
@@ -554,6 +673,14 @@ void DetectorConstruction::readConfigFile(string configFileName)
   config.readInto(det_d,"det_d");
   config.readInto(det_material,"det_material");
   
+  config.readInto(preshower_l,"preshower_l");
+  config.readInto(preshower_material,"preshower_material");
+  config.readInto(postshower_l,"postshower_l");
+  config.readInto(postshower_material,"postshower_material");
+  config.readInto(sideshower_w,"sideshower_w");
+  config.readInto(sideshower_l,"sideshower_l");
+  config.readInto(sideshower_material,"sideshower_material");
+    
   config.readInto(depth,"depth");
 }
 
@@ -624,6 +751,42 @@ void DetectorConstruction::initializeMaterials()
     exit(-1);
   }
   G4cout << "Detector material: " << det_material << G4endl;	
+  
+  
+  PreMaterial = NULL;
+  if     ( preshower_material == 1 ) PreMaterial = MyMaterials::Brass();
+  else if( preshower_material == 2 ) PreMaterial = MyMaterials::Tungsten();
+  else if( preshower_material == 3 ) PreMaterial = MyMaterials::Air();
+  else
+  {
+    G4cerr << "<DetectorConstructioninitializeMaterials>: Invalid preshower material specifier " << preshower_material << G4endl;
+    exit(-1);
+  }
+  G4cout << "Pre. material: "<< PreMaterial << G4endl;
+  
+  
+  PostMaterial = NULL;
+  if     ( postshower_material == 1 ) PostMaterial = MyMaterials::Brass();
+  else if( postshower_material == 2 ) PostMaterial = MyMaterials::Tungsten();
+  else if( postshower_material == 3 ) PostMaterial = MyMaterials::Air();
+  else
+  {
+    G4cerr << "<DetectorConstructioninitializeMaterials>: Invalid postshower material specifier " << postshower_material << G4endl;
+    exit(-1);
+  }
+  G4cout << "Post. material: "<< PostMaterial << G4endl;
+  
+  
+  SideMaterial = NULL;
+  if     ( sideshower_material == 1 ) SideMaterial = MyMaterials::Brass();
+  else if( sideshower_material == 2 ) SideMaterial = MyMaterials::Tungsten();
+  else if( sideshower_material == 3 ) SideMaterial = MyMaterials::Air();
+  else
+  {
+    G4cerr << "<DetectorConstructioninitializeMaterials>: Invalid sideshower material specifier " << sideshower_material << G4endl;
+    exit(-1);
+  }
+  G4cout << "Side. material: "<< SideMaterial << G4endl;
   
   
   

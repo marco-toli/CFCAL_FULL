@@ -58,22 +58,31 @@ public:
   DetectorConstruction(const string& configFileName);
   ~DetectorConstruction();
   
+  G4double GetHoleRadius()  const { return hole_radius; };
+  G4double GetFiberRadius() const { return fiber_radius; };
+  G4double GetFiberLength() const { return fiber_length; };
+  
   G4double GetModule_x() const { return module_x; };
   G4double GetModule_y() const { return module_y; };
   G4double GetModule_z() const { return module_z; };
   
+  G4double GetActiveArea_x() const { return activeArea_x; };
+  G4double GetActiveArea_y() const { return activeArea_y; };
+  
   G4int GetNModules_x() const { return nModules_x; };
   G4int GetNModules_y() const { return nModules_y; };
   
-  G4int GetNFibers_xy() const { return nFibers_xy; };
-  G4int GetNLayers_z()  const { return nLayers_z;  };
+  G4int GetNFibers_x() const { return nFibers_x; };
+  G4int GetNFibers_y() const { return nFibers_y; };
+  G4int GetNLayers_z() const { return nLayers_z;  };
   
-  G4double GetSpacing_xy() const { return spacing_xy; };
-  G4double GetSpacing_z()  const { return spacing_z;  };
+  G4double GetSpacing_x() const { return spacing_x; };
+  G4double GetSpacing_y() const { return spacing_y; };
+  G4double GetSpacing_z() const { return spacing_z; };
   
-  G4double GetHoleRadius()  const { return hole_radius; };
-  G4double GetFiberRadius() const { return fiber_radius; };
-  G4double GetFiberLength() const { return fiber_length; };
+  G4double GetOffset_z()  const { return offset_z; };
+  
+  G4double GetPreshower_l()  const { return preshower_l; };
   
   G4double GetAttLambda(const G4int& it) const { return attLambdas[it]; };
   
@@ -141,9 +150,17 @@ private:
   G4VPhysicalVolume* fHBtmDetector1PV[500];   // the absorber fibers
   G4VPhysicalVolume* fHBtmDetector2PV[500];   // the absorber fibers
   
+  G4VPhysicalVolume* fPreshowerPV;   // the preshower physical volume
+  G4VPhysicalVolume* fPostshowerPV;   // the postshower physical volume
+  G4VPhysicalVolume* fSideshowerPV;   // the postshower physical volume
+  
   G4double expHall_x;
   G4double expHall_y;
   G4double expHall_z;
+  
+  G4double calor_x;
+  G4double calor_y;
+  G4double calor_z;
   
   G4int    crystal_material;
   G4int    crystal_lightyield;
@@ -153,16 +170,24 @@ private:
   
   G4double fiber_length;
   G4double fiber_radius;
-  G4int fiber_vertical;
-  G4int fiber_horizontal;
+  G4double fiber_spacing_xy;
+  G4double fiber_spacing_z;
+  G4double fiber_offset_z;
+  G4int fiber_x;
+  G4int fiber_y;
+  G4int nFibers_x;
+  G4int nFibers_y;
   int nModules_x, nModules_y;
-  int nFibers_xy, nLayers_z;
-  G4double spacing_xy, spacing_z;
+  int nLayers_z;
+  G4double spacing_x, spacing_y, spacing_z;
+  G4double offset_z;
   G4double hole_radius;
   
   G4double module_x;
   G4double module_y;
   G4double module_z;
+  G4double activeArea_x;
+  G4double activeArea_y;
   G4int abs_material;
   
   G4double win_r;
@@ -175,6 +200,14 @@ private:
   G4double det_d;
   G4int    det_material;
   
+  G4double preshower_l;
+  G4int    preshower_material;
+  G4double postshower_l;
+  G4int    postshower_material;
+  G4double sideshower_w;
+  G4double sideshower_l;
+  G4int    sideshower_material;
+  
   G4double depth;
   
   G4double attLambdas[10];
@@ -186,6 +219,9 @@ private:
   G4Material* GaMaterial;
   G4Material* WiMaterial;
   G4Material* DeMaterial;
+  G4Material* PreMaterial;
+  G4Material* PostMaterial;
+  G4Material* SideMaterial;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
