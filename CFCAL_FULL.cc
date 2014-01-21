@@ -148,8 +148,8 @@ int main(int argc,char** argv)
   
   G4bool init_data   = 1;
   G4bool deposition  = 0;
-  G4bool opPhotons   = 1;
-  G4bool timing      = 1;
+  G4bool opPhotons   = 0;
+  G4bool timing      = 0;
   CreateTree* mytree = new CreateTree("tree", init_data, deposition, opPhotons, timing);
   
   

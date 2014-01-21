@@ -81,35 +81,45 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
   
   G4double global_x = point_x + 0.5*fDetectorConstruction->GetNModules_x()*fDetectorConstruction->GetModule_x();
   G4int nModule_x = int( global_x / (fDetectorConstruction->GetModule_x()) );
-  G4double local_x = global_x - nModule_x*fDetectorConstruction->GetModule_x() - 0.5*(fDetectorConstruction->GetModule_x()-fDetectorConstruction->GetActiveArea_x());
+  G4double local_x = global_x
+    - nModule_x*fDetectorConstruction->GetModule_x()
+    - 0.5*(fDetectorConstruction->GetModule_x()-fDetectorConstruction->GetActiveArea_x())
+    - (hole_radius-fiber_radius);
   
   G4double global_y = point_y + 0.5*fDetectorConstruction->GetNModules_y()*fDetectorConstruction->GetModule_y();
   G4int nModule_y = int( global_y / (fDetectorConstruction->GetModule_y()) );
-  G4double local_y = global_y - nModule_y*fDetectorConstruction->GetModule_y() - 0.5*(fDetectorConstruction->GetModule_y()-fDetectorConstruction->GetActiveArea_y());
+  G4double local_y = global_y
+    - nModule_y*fDetectorConstruction->GetModule_y()
+    - 0.5*(fDetectorConstruction->GetModule_y()-fDetectorConstruction->GetActiveArea_y())
+    - (hole_radius-fiber_radius);
   
   G4int fiberIX = -999;
   G4int fiberIY = -999;
+  G4int fiberIXiZ = -999;
+  G4int fiberIYiZ = -999;
   G4double fiberLocal_x = -999.;
   G4double fiberLocal_y = -999.;
   G4double fiberLocal_z = -999.;
   
   if( fineLayer_z == 0 )
   {
-    fiberLocal_x = local_x - 0.5*spacing_x*int( local_x / (0.5*spacing_x) ) - hole_radius;
+    fiberLocal_x = local_x - 0.5*spacing_x*int( local_x / (0.5*spacing_x) ) - fiber_radius;
     fiberLocal_y = local_y - 0.5*fiber_length;
     fiberLocal_z = local_z - ( 0.5*spacing_z - 2. );
     
     fiberIX = nModule_x*2.*fDetectorConstruction->GetNFibers_x() + int( local_x / (0.5*spacing_x) );
     fiberIY = nModule_y;
+    fiberIXiZ = (fDetectorConstruction->GetNModules_x()*2.*fDetectorConstruction->GetNFibers_x()) * coarseLayer_z + fiberIX;
   }
   if( fineLayer_z == 1 )
   {
     fiberLocal_x = local_x - 0.5*fiber_length;
-    fiberLocal_y = local_y - 0.5*spacing_y*int( local_y / (0.5*spacing_y) ) - hole_radius;
+    fiberLocal_y = local_y - 0.5*spacing_y*int( local_y / (0.5*spacing_y) ) - fiber_radius;
     fiberLocal_z = local_z - ( 0.5*spacing_z + 2. );
     
     fiberIX = nModule_x;
     fiberIY = nModule_y*2.*fDetectorConstruction->GetNFibers_y() + int( local_y / (0.5*spacing_y) );
+    fiberIYiZ = (fDetectorConstruction->GetNModules_y()*2.*fDetectorConstruction->GetNFibers_y()) * coarseLayer_z+fineLayer_z + fiberIY;
   }
   
   
@@ -155,8 +165,14 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
     
     
     if( (theTrack->GetLogicalVolumeAtVertex()->GetName() == "Fiber") && (nStep == 1) && (processName == "Cerenkov") )
-    CreateTree::Instance()->Tot_phot_cer += 1;
-    
+    {
+      CreateTree::Instance()->Tot_phot_cer += 1;
+      CreateTree::Instance()->Tot_phot_cer_iX[fiberIX] += 1;
+      CreateTree::Instance()->Tot_phot_cer_iY[fiberIY] += 1;
+      CreateTree::Instance()->Tot_phot_cer_iZ[2*coarseLayer_z+fineLayer_z] += 1;
+      CreateTree::Instance()->Tot_phot_cer_iXiZ[fiberIXiZ] += 1;
+      CreateTree::Instance()->Tot_phot_cer_iYiZ[fiberIYiZ] += 1;
+    }
     
     // do this cycle only IF info on optical photons is needed
     if( CreateTree::Instance()->OpPhotons() )
@@ -360,9 +376,15 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
         CreateTree::Instance()->Total_nonion_energy_fibers += nonion_energy;
         
         if( fineLayer_z == 0 )
+        {
           CreateTree::Instance()->Total_ion_energy_fibers_iX[fiberIX] += ion_energy;
+          CreateTree::Instance()->Total_ion_energy_fibers_iXiZ[fiberIXiZ] += ion_energy;
+        }
         if( fineLayer_z == 1 )
+        {
           CreateTree::Instance()->Total_ion_energy_fibers_iY[fiberIY] += ion_energy;
+          CreateTree::Instance()->Total_ion_energy_fibers_iYiZ[fiberIYiZ] += ion_energy;
+        }
         CreateTree::Instance()->Total_ion_energy_fibers_iZ[2*coarseLayer_z+fineLayer_z] += ion_energy;
         
         for(int i = 0; i < 9; ++i)

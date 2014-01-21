@@ -25,12 +25,14 @@ while(<LIST>)
   s/^\s+//;               # no leading white
   s/\s+$//;               # no trailing white
   
-  ($label,$particle,$energy,$Nevts,$Njobs,$Nfirst) = split(" ");
+  ($label,$particle,$energy,$preL,$Nevts,$Njobs,$Nfirst) = split(" ");
   
   if( $label eq "" )
   {
     next;
   }
+  
+  $label = $label."_preshower".$preL."mm";
   
   print($label." ".$particle," ".$energy." ".$Nevts." ".$Njobs." ".$Nfirst."\n");
   

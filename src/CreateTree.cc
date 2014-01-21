@@ -33,6 +33,8 @@ CreateTree::CreateTree(TString name, bool init_data, bool deposition, bool opPho
   this->GetTree()->Branch("Total_ion_energy_fibers_iX",     &this->Total_ion_energy_fibers_iX,     "Total_ion_energy_fibers_iX[1000]/F");
   this->GetTree()->Branch("Total_ion_energy_fibers_iY",     &this->Total_ion_energy_fibers_iY,     "Total_ion_energy_fibers_iY[1000]/F");
   this->GetTree()->Branch("Total_ion_energy_fibers_iZ",     &this->Total_ion_energy_fibers_iZ,     "Total_ion_energy_fibers_iZ[1000]/F");
+  this->GetTree()->Branch("Total_ion_energy_fibers_iXiZ",     &this->Total_ion_energy_fibers_iXiZ,     "Total_ion_energy_fibers_iXiZ[1000]/F");
+  this->GetTree()->Branch("Total_ion_energy_fibers_iYiZ",     &this->Total_ion_energy_fibers_iYiZ,     "Total_ion_energy_fibers_iYiZ[1000]/F");
   
   this->GetTree()->Branch("Total_energy_absorber",       &this->Total_energy_absorber,       "Total_energy_absorber/F");
   this->GetTree()->Branch("Total_ion_energy_absorber",   &this->Total_ion_energy_absorber,   "Total_ion_energy_absorber/F");
@@ -54,8 +56,14 @@ CreateTree::CreateTree(TString name, bool init_data, bool deposition, bool opPho
   this->GetTree()->Branch("Total_ion_energy_world",   &this->Total_ion_energy_world,   "Total_ion_energy_world/F");
   this->GetTree()->Branch("Total_nonion_energy_world",&this->Total_nonion_energy_world,"Total_nonion_energy_world/F");
   
+  this->GetTree()->Branch("Tot_phot_cer",     &this->Tot_phot_cer,     "Tot_phot_cer/F");
+  this->GetTree()->Branch("Tot_phot_cer_iX",  &this->Tot_phot_cer_iX,  "Tot_phot_cer_iX[1000]/F");
+  this->GetTree()->Branch("Tot_phot_cer_iY",  &this->Tot_phot_cer_iY,  "Tot_phot_cer_iY[1000]/F");
+  this->GetTree()->Branch("Tot_phot_cer_iZ",  &this->Tot_phot_cer_iZ,  "Tot_phot_cer_iZ[1000]/F");
+  this->GetTree()->Branch("Tot_phot_cer_iXiZ",&this->Tot_phot_cer_iXiZ,"Tot_phot_cer_iXiZ[1000]/F");
+  this->GetTree()->Branch("Tot_phot_cer_iYiZ",&this->Tot_phot_cer_iYiZ,"Tot_phot_cer_iYiZ[1000]/F");
+  
   this->GetTree()->Branch("Total_em_energy",&this->Total_em_energy,"Total_em_energy/F");
-  this->GetTree()->Branch("Tot_phot_cer",   &this->Tot_phot_cer,   "Tot_phot_cer/F");
   
   this->GetTree()->Branch("Radial_stepLength",               &this->Radial_stepLength,               "Radial_stepLength/F");
   this->GetTree()->Branch("Longitudinal_stepLength",         &this->Longitudinal_stepLength,         "Longitudinal_stepLength/F");
@@ -205,6 +213,8 @@ void CreateTree::Clear()
     Total_ion_energy_fibers_iX[i] = 0;
     Total_ion_energy_fibers_iY[i] = 0;
     Total_ion_energy_fibers_iZ[i] = 0;
+    Total_ion_energy_fibers_iXiZ[i] = 0;
+    Total_ion_energy_fibers_iYiZ[i] = 0;
   }
   
   Total_energy_absorber        = 0;
@@ -227,8 +237,17 @@ void CreateTree::Clear()
   Total_ion_energy_world    = 0;
   Total_nonion_energy_world = 0;
   
-  Total_em_energy = 0;
   Tot_phot_cer = 0;
+  for(int i = 0; i < 1000; ++i)
+  {
+    Tot_phot_cer_iX[i] = 0;
+    Tot_phot_cer_iY[i] = 0;
+    Tot_phot_cer_iZ[i] = 0;
+    Tot_phot_cer_iXiZ[i] = 0;
+    Tot_phot_cer_iYiZ[i] = 0;
+  }
+  
+  Total_em_energy = 0;
   
   Radial_stepLength = 0.;
   Longitudinal_stepLength = 0.;

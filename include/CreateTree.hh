@@ -81,6 +81,8 @@ public:
   float Total_ion_energy_fibers_iX[1000];
   float Total_ion_energy_fibers_iY[1000];
   float Total_ion_energy_fibers_iZ[1000];
+  float Total_ion_energy_fibers_iXiZ[1000];
+  float Total_ion_energy_fibers_iYiZ[1000];
   
   float Total_energy_absorber;
   float Total_ion_energy_absorber;
@@ -103,6 +105,12 @@ public:
   float Total_nonion_energy_world;
 
   float Tot_phot_cer;
+  float Tot_phot_cer_iX[1000];
+  float Tot_phot_cer_iY[1000];
+  float Tot_phot_cer_iZ[1000];
+  float Tot_phot_cer_iXiZ[1000];
+  float Tot_phot_cer_iYiZ[1000];
+  
   float Total_em_energy;
   
   float Radial_stepLength;

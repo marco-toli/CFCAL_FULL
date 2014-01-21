@@ -19,6 +19,7 @@
 /vis/viewer/zoomTo 10
 
 # Specify style (surface or wireframe):
+/vis/viewer/set/background white 0
 #/vis/viewer/set/style wireframe
 /vis/viewer/set/style surface
 
@@ -35,7 +36,7 @@
 # (if too many tracks cause core dump => /tracking/storeTrajectory 0)
 #
 # Draw hits at end of event:
-/vis/scene/add/hits
+#/vis/scene/add/hits
 #
 # To draw only gammas:
 /vis/filtering/trajectories/create/particleFilter
@@ -59,32 +60,24 @@
 #
 # To superimpose all of the events from a given run:
 /vis/scene/endOfEventAction accumulate
-#
-# Re-establish auto refreshing and verbosity:
-#/vis/viewer/set/autoRefresh true
-#/vis/verbose warnings
-#
-# For file-based drivers, use this to create an empty detector view:
-#/vis/viewer/flush
-
-/units/list
 
 
 
 /gps/energy 10 GeV
 /gps/particle e-
 
+/gps/direction 0. 0. 1.
+
 /gps/pos/type Plane
 /gps/pos/shape Square
 /gps/pos/halfx 0.01 mm
 /gps/pos/halfy 0.01 mm
 
-/gps/ang/type beam2d
-/gps/ang/focuspoint 0 0 -1.50 m
-/gps/ang/sigma_x 0.05 mrad
-/gps/ang/sigma_y 0.05 mrad
-
-/gps/direction 0. 0. 1.
+#/gps/ang/type beam2d
+#/gps/ang/focuspoint 0 0 -1.50 m
+#/gps/ang/sigma_x 0.05 mrad
+##/gps/ang/sigma_y 0.05 mrad
 
 #/tracking/verbose 1
-/run/beamOn 1
+
+#/run/beamOn 1
