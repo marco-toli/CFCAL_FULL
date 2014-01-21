@@ -2,7 +2,7 @@
 # initialization of G4GeneralParticleSource
 
 
-/gps/energy 16 GeV
+/gps/energy 1 GeV
 /gps/particle e-
 
 /gps/pos/type Plane
