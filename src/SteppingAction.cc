@@ -17,6 +17,9 @@ SteppingAction::~SteppingAction()
 
 void SteppingAction::UserSteppingAction(const G4Step * theStep)
 {
+  G4bool debug = false;
+  
+  
   G4StepPoint* thePrePoint  = theStep -> GetPreStepPoint();
   G4StepPoint* thePostPoint = theStep -> GetPostStepPoint();
   
@@ -95,6 +98,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
   
   G4int fiberIX = -999;
   G4int fiberIY = -999;
+  G4int fiberIZ = -999;
   G4int fiberIXiZ = -999;
   G4int fiberIYiZ = -999;
   G4double fiberLocal_x = -999.;
@@ -108,7 +112,6 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
     fiberLocal_z = local_z - ( 0.5*spacing_z - 2. );
     
     fiberIX = nModule_x*2.*fDetectorConstruction->GetNFibers_x() + int( local_x / (0.5*spacing_x) );
-    fiberIY = nModule_y;
     fiberIXiZ = (fDetectorConstruction->GetNModules_x()*2.*fDetectorConstruction->GetNFibers_x()) * coarseLayer_z + fiberIX;
   }
   if( fineLayer_z == 1 )
@@ -117,10 +120,10 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
     fiberLocal_y = local_y - 0.5*spacing_y*int( local_y / (0.5*spacing_y) ) - fiber_radius;
     fiberLocal_z = local_z - ( 0.5*spacing_z + 2. );
     
-    fiberIX = nModule_x;
     fiberIY = nModule_y*2.*fDetectorConstruction->GetNFibers_y() + int( local_y / (0.5*spacing_y) );
-    fiberIYiZ = (fDetectorConstruction->GetNModules_y()*2.*fDetectorConstruction->GetNFibers_y()) * coarseLayer_z+fineLayer_z + fiberIY;
+    fiberIYiZ = (fDetectorConstruction->GetNModules_y()*2.*fDetectorConstruction->GetNFibers_y()) * coarseLayer_z + fiberIY;
   }
+  fiberIZ = 2*coarseLayer_z + fineLayer_z;
   
   
   
@@ -149,6 +152,8 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
   
   //--------------
   // optical photon
+  if( debug ) G4cout << ">>> optical photon begin" << G4endl;
+  
   if( particleType == G4OpticalPhoton::OpticalPhotonDefinition() )
   { 
     G4String processName = theTrack->GetCreatorProcess()->GetProcessName();
@@ -164,22 +169,34 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
     //  theTrack->SetTrackStatus(fKillTrackAndSecondaries);
     
     
+    
+    if( debug ) G4cout << ">>> optical photon begin >>> fiber begin " << G4endl;
     if( (theTrack->GetLogicalVolumeAtVertex()->GetName() == "Fiber") && (nStep == 1) && (processName == "Cerenkov") )
     {
       CreateTree::Instance()->Tot_phot_cer += 1;
-      CreateTree::Instance()->Tot_phot_cer_iX[fiberIX] += 1;
-      CreateTree::Instance()->Tot_phot_cer_iY[fiberIY] += 1;
-      CreateTree::Instance()->Tot_phot_cer_iZ[2*coarseLayer_z+fineLayer_z] += 1;
-      CreateTree::Instance()->Tot_phot_cer_iXiZ[fiberIXiZ] += 1;
-      CreateTree::Instance()->Tot_phot_cer_iYiZ[fiberIYiZ] += 1;
+      if( fineLayer_z == 0 )
+      {
+        CreateTree::Instance()->Tot_phot_cer_iX.at(fiberIX) += 1;
+        CreateTree::Instance()->Tot_phot_cer_iXiZ.at(fiberIXiZ) += 1;
+      }
+      if( fineLayer_z == 1 )
+      {
+        CreateTree::Instance()->Tot_phot_cer_iY.at(fiberIY) += 1;
+        CreateTree::Instance()->Tot_phot_cer_iYiZ.at(fiberIYiZ) += 1;
+      }
+      CreateTree::Instance()->Tot_phot_cer_iZ.at(fiberIZ) += 1;
     }
+    if( debug ) G4cout << ">>> optical photon begin >>> fiber end " << G4endl;
+    
+    
     
     // do this cycle only IF info on optical photons is needed
+    if( debug ) G4cout << ">>> optical photon begin >>> OpPhotons() begin " << G4endl;
     if( CreateTree::Instance()->OpPhotons() )
     {
       //---------------------------------------------------------
       // storing time, energy and position of all optical photons
-      
+
       if( (theTrack->GetLogicalVolumeAtVertex()->GetName() == "Fiber") && (nStep == 1) )
       {
         if     ( processName == "Cerenkov" )      CreateTree::Instance()->opPhoton_process.push_back( +1 );
@@ -191,7 +208,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
         CreateTree::Instance()->opPhoton_parentTrackID.push_back( theTrack->GetParentID() );
         CreateTree::Instance()->opPhoton_fiberIX.push_back( fiberIX );
         CreateTree::Instance()->opPhoton_fiberIY.push_back( fiberIY );
-        CreateTree::Instance()->opPhoton_fiberIZ.push_back( 2*coarseLayer_z + fineLayer_z );
+        CreateTree::Instance()->opPhoton_fiberIZ.push_back( fiberIZ );
         CreateTree::Instance()->opPhoton_energy.push_back( theTrack->GetTotalEnergy()/eV );
         CreateTree::Instance()->opPhoton_prodTime.push_back( theTrackInfo->GetParticleProdTime() );
         CreateTree::Instance()->opPhoton_time.push_back( thePrePoint->GetGlobalTime()/picosecond );
@@ -247,7 +264,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
           CreateTree::Instance()->opPhotonFast_parentTrackID_gap.push_back( theTrack->GetParentID() );
           CreateTree::Instance()->opPhotonFast_fiberIX_gap.push_back( fiberIX );
           CreateTree::Instance()->opPhotonFast_fiberIY_gap.push_back( fiberIY );
-          CreateTree::Instance()->opPhotonFast_fiberIZ_gap.push_back( 2*coarseLayer_z + fineLayer_z );
+          CreateTree::Instance()->opPhotonFast_fiberIZ_gap.push_back( fiberIZ );
           CreateTree::Instance()->opPhotonFast_energy_gap.push_back( theTrack->GetTotalEnergy()/eV );
           CreateTree::Instance()->opPhotonFast_prodTime_gap.push_back( theTrackInfo->GetParticleProdTime() );
           CreateTree::Instance()->opPhotonFast_time_gap.push_back( trc.time[iTrial] );
@@ -273,7 +290,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
         CreateTree::Instance()->opPhoton_parentTrackID_gap.push_back( theTrack->GetParentID() );
         CreateTree::Instance()->opPhoton_fiberIX_gap.push_back( fiberIX );
         CreateTree::Instance()->opPhoton_fiberIY_gap.push_back( fiberIY );
-        CreateTree::Instance()->opPhoton_fiberIZ_gap.push_back( 2*coarseLayer_z + fineLayer_z );
+        CreateTree::Instance()->opPhoton_fiberIZ_gap.push_back( fiberIZ );
         if( thePostPVName == "vTopGap1" || thePostPVName == "vTopGap2" || 
             thePostPVName == "hTopGap1" || thePostPVName == "hTopGap2" )
           CreateTree::Instance()->opPhoton_side_gap.push_back( +1 );
@@ -303,7 +320,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
         CreateTree::Instance()->opPhoton_parentTrackID_det.push_back( theTrack->GetParentID() );
         CreateTree::Instance()->opPhoton_fiberIX_det.push_back( fiberIX );
         CreateTree::Instance()->opPhoton_fiberIY_det.push_back( fiberIY );
-        CreateTree::Instance()->opPhoton_fiberIZ_det.push_back( 2*coarseLayer_z + fineLayer_z );
+        CreateTree::Instance()->opPhoton_fiberIZ_det.push_back( fiberIZ );
         if( thePostPVName == "vTopDetector1" || thePostPVName == "vTopDetector2" || 
             thePostPVName == "hTopDetector1" || thePostPVName == "hTopDetector2" )
           CreateTree::Instance()->opPhoton_side_det.push_back( +1 );
@@ -317,10 +334,14 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
       
       
     } // do this cycle only IF info on optical photons is needed
+    if( debug ) G4cout << ">>> optical photon begin >>> OpPhotons() end " << G4endl;    
+    
   } // optical photon
+  if( debug ) G4cout << ">>> optical photon end" << G4endl;    
   
   
   // non optical photon
+  if( debug ) G4cout << ">>> non optical photon begin" << G4endl;
   else
   {
     float energy = theStep->GetTotalEnergyDeposit()/GeV;
@@ -330,45 +351,61 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
     if( energy > 0 )
     {	
       // world
+      if( debug ) G4cout << ">>> non optical photon begin >>> world begin" << G4endl;
       {
         CreateTree::Instance()->Total_energy_world        += energy;
         CreateTree::Instance()->Total_ion_energy_world    += ion_energy;
         CreateTree::Instance()->Total_nonion_energy_world += nonion_energy;
       }
+      if( debug ) G4cout << ">>> non optical photon begin >>> world end" << G4endl;
+      
       
       // absorber
+      if( debug ) G4cout << ">>> non optical photon begin >>> absorber begin" << G4endl;
       if( thePreLVName == "Absorber" || thePreLVName == "Fiber" || thePreLVName == "Hole" )
       {
         CreateTree::Instance()->Total_energy_absorber        += energy;
         CreateTree::Instance()->Total_ion_energy_absorber    += ion_energy;
         CreateTree::Instance()->Total_nonion_energy_absorber += nonion_energy;
       }
+      if( debug ) G4cout << ">>> non optical photon begin >>> absorber end" << G4endl;
+      
       
       // preshower
+      if( debug ) G4cout << ">>> non optical photon begin >>> preshower begin" << G4endl;
       if( thePreLVName == "Preshower" )
       {
         CreateTree::Instance()->Total_energy_preshower        += energy;
         CreateTree::Instance()->Total_ion_energy_preshower    += ion_energy;
         CreateTree::Instance()->Total_nonion_energy_preshower += nonion_energy;
       }
+      if( debug ) G4cout << ">>> non optical photon begin >>> preshower end" << G4endl;
+      
       
       // postshower
+      if( debug ) G4cout << ">>> non optical photon begin >>> postshower begin" << G4endl;
       if( thePreLVName == "Postshower" )
       {
         CreateTree::Instance()->Total_energy_postshower        += energy;
         CreateTree::Instance()->Total_ion_energy_postshower    += ion_energy;
         CreateTree::Instance()->Total_nonion_energy_postshower += nonion_energy;
       }
+      if( debug ) G4cout << ">>> non optical photon begin >>> postshower end" << G4endl;
+      
       
       // sideshower
+      if( debug ) G4cout << ">>> non optical photon begin >>> sideshower begin" << G4endl;
       if( thePreLVName == "Sideshower" )
       {
         CreateTree::Instance()->Total_energy_sideshower        += energy;
         CreateTree::Instance()->Total_ion_energy_sideshower    += ion_energy;
         CreateTree::Instance()->Total_nonion_energy_sideshower += nonion_energy;
       }
+      if( debug ) G4cout << ">>> non optical photon begin >>> sideshower end" << G4endl;
+      
       
       // fibers
+      if( debug ) G4cout << ">>> non optical photon begin >>> fibers begin" << G4endl;
       if( thePreLVName == "Fiber" )
       {
         CreateTree::Instance()->Total_energy_fibers        += energy;
@@ -377,15 +414,15 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
         
         if( fineLayer_z == 0 )
         {
-          CreateTree::Instance()->Total_ion_energy_fibers_iX[fiberIX] += ion_energy;
-          CreateTree::Instance()->Total_ion_energy_fibers_iXiZ[fiberIXiZ] += ion_energy;
+          CreateTree::Instance()->Total_ion_energy_fibers_iX.at(fiberIX) += ion_energy;
+          CreateTree::Instance()->Total_ion_energy_fibers_iXiZ.at(fiberIXiZ) += ion_energy;
         }
         if( fineLayer_z == 1 )
         {
-          CreateTree::Instance()->Total_ion_energy_fibers_iY[fiberIY] += ion_energy;
-          CreateTree::Instance()->Total_ion_energy_fibers_iYiZ[fiberIYiZ] += ion_energy;
+          CreateTree::Instance()->Total_ion_energy_fibers_iY.at(fiberIY) += ion_energy;
+          CreateTree::Instance()->Total_ion_energy_fibers_iYiZ.at(fiberIYiZ) += ion_energy;
         }
-        CreateTree::Instance()->Total_ion_energy_fibers_iZ[2*coarseLayer_z+fineLayer_z] += ion_energy;
+        CreateTree::Instance()->Total_ion_energy_fibers_iZ.at(fiberIZ) += ion_energy;
         
         for(int i = 0; i < 9; ++i)
         {
@@ -407,18 +444,20 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
           }
         }
       }
+      if( debug ) G4cout << ">>> non optical photon begin >>> fibers end" << G4endl;
       
-      // what else?
-      if( thePreLVName != "Absorber" && 
-          thePreLVName != "Fiber" && 
-          thePreLVName != "Hole" && 
-          thePreLVName != "Preshower" && 
-          thePreLVName != "Postshower" && 
-          thePreLVName != "Sideshower" && 
-          thePreLVName != "World" )
-      {
-        std::cout << ">>> ATTENZIONE: thePreLVName: " << thePreLVName << "!!!" << std::endl;
-      }
+      
+      //// what else?
+      //if( thePreLVName != "Absorber" && 
+      //    thePreLVName != "Fiber" && 
+      //    thePreLVName != "Hole" && 
+      //    thePreLVName != "Preshower" && 
+      //    thePreLVName != "Postshower" && 
+      //    thePreLVName != "Sideshower" && 
+      //    thePreLVName != "World" )
+      //{
+      //  G4cout << ">>> ATTENZIONE: thePreLVName: " << thePreLVName << "!!!" << G4endl;
+      //}
       
       
       G4int iRadius = sqrt( pow(thePrePosition.x()/mm-CreateTree::Instance()->InitialPositionX,2) +
@@ -452,5 +491,5 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
       }
     }  
   } // non optical photon
-  
+  if( debug ) G4cout << ">>> non optical photon end" << G4endl;
 }

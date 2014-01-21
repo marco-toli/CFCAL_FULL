@@ -65,7 +65,7 @@ DetectorConstruction::DetectorConstruction(const string& configFileName)
   
   expHall_x = expHall_y = expHall_z = 10*m;
   
-  hole_radius = fiber_radius + 0.5*mm;
+  hole_radius = fiber_radius + 0.1*mm;
   
   if( fiber_x )
   {

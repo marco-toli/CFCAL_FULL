@@ -223,8 +223,8 @@ int main(int argc,char** argv)
   runManager->SetUserAction(run_action);  
   G4cout << ">>> Define RunAction::end <<<" << G4endl; 
   
-  G4cout << ">>> Define EventAction::begin <<<" << G4endl; 
-  G4UserEventAction* event_action = new EventAction;
+  G4cout << ">>> Define EventAction::begin <<<" << G4endl;
+  G4UserEventAction* event_action = new EventAction(detector);
   runManager->SetUserAction(event_action);
   G4cout << ">>> Define EventAction::end <<<" << G4endl; 
   

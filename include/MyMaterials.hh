@@ -1,3 +1,6 @@
+#ifndef MyMaterials_h
+#define MyMaterials_h 1
+
 #include "G4Material.hh"
 #include "G4MaterialTable.hh"
 #include "G4Element.hh"
@@ -38,3 +41,5 @@ public:
   static G4double fromEvToNm(G4double energy);
   static G4double CalculateSellmeier(int size, G4double indexZero, G4double *nVec, G4double *lVec, G4double wavelength);
 };
+
+#endif

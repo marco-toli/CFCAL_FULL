@@ -1,33 +1,17 @@
-// Martin Goettlich @ DESY
-//
- 
 #include "EventAction.hh"
-#include "G4RunManager.hh"
-#include "G4Event.hh"
-#include "G4EventManager.hh"
-#include "G4TrajectoryContainer.hh"
-#include "G4Trajectory.hh"
-#include "G4VVisManager.hh"
-#include "G4ios.hh"
-#include "G4SDManager.hh"
-#include "MyMaterials.hh"
-#include "CreateTree.hh"
-#include "PrimaryGeneratorAction.hh"
-
-#include <vector>
-
-#include "TFile.h"
-#include "TTree.h"
-#include "TString.h"
 
 
-EventAction::EventAction()
-{
-}
- 
+
+EventAction::EventAction(const DetectorConstruction* detectorConstruction):
+  fDetectorConstruction(detectorConstruction)
+{}
+
+
+
 EventAction::~EventAction()
-{
-}
+{}
+
+
 
 void EventAction::BeginOfEventAction(const G4Event* evt)
 {
@@ -37,7 +21,14 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
     G4cout << "---> Begin of Event: " << evtNb << G4endl;
   }
   
-  CreateTree::Instance() -> Clear();
+  
+  int nFib_x = fDetectorConstruction->GetNModules_x() * fDetectorConstruction->GetNFibers_x() * 2;
+  int nFib_y = fDetectorConstruction->GetNModules_y() * fDetectorConstruction->GetNFibers_y() * 2;
+  int nFib_z = fDetectorConstruction->GetNLayers_z() * 2;
+  int nFib_xz = nFib_x * nFib_z / 2;
+  int nFib_yz = nFib_y * nFib_z / 2;
+  CreateTree::Instance() -> Clear(nFib_x,nFib_y,nFib_z,nFib_xz,nFib_yz);
+  
   
   // --------------------- STORE INFO FOR X_0 / R_M ----------------------------- //
   int Radial_nSteps       = 5000;

@@ -33,7 +33,7 @@ public:
   TString            GetName() const { return fname; };
   int                Fill() { return this->GetTree()->Fill(); };
   bool               Write();
-  void               Clear();
+  void               Clear(const int& nFib_x, const int& nFib_y, const int& nFib_z, const int& nFib_xz, const int& nFib_yz);
   static CreateTree* Instance() { return fInstance; };
   static CreateTree* fInstance;
   
@@ -78,11 +78,11 @@ public:
   float Total_ion_energy_fibers_att[10];
   float Total_ion_energy_fibers_att_top[10];
   float Total_ion_energy_fibers_att_btm[10];
-  float Total_ion_energy_fibers_iX[1000];
-  float Total_ion_energy_fibers_iY[1000];
-  float Total_ion_energy_fibers_iZ[1000];
-  float Total_ion_energy_fibers_iXiZ[1000];
-  float Total_ion_energy_fibers_iYiZ[1000];
+  std::vector<float> Total_ion_energy_fibers_iX;
+  std::vector<float> Total_ion_energy_fibers_iY;
+  std::vector<float> Total_ion_energy_fibers_iZ;
+  std::vector<float> Total_ion_energy_fibers_iXiZ;
+  std::vector<float> Total_ion_energy_fibers_iYiZ;
   
   float Total_energy_absorber;
   float Total_ion_energy_absorber;
@@ -104,12 +104,12 @@ public:
   float Total_ion_energy_world;
   float Total_nonion_energy_world;
 
-  float Tot_phot_cer;
-  float Tot_phot_cer_iX[1000];
-  float Tot_phot_cer_iY[1000];
-  float Tot_phot_cer_iZ[1000];
-  float Tot_phot_cer_iXiZ[1000];
-  float Tot_phot_cer_iYiZ[1000];
+  int Tot_phot_cer;
+  std::vector<int> Tot_phot_cer_iX;
+  std::vector<int> Tot_phot_cer_iY;
+  std::vector<int> Tot_phot_cer_iZ;
+  std::vector<int> Tot_phot_cer_iXiZ;
+  std::vector<int> Tot_phot_cer_iYiZ;
   
   float Total_em_energy;
   
