@@ -32,9 +32,9 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
   
   // --------------------- STORE INFO FOR X_0 / R_M ----------------------------- //
   int Radial_nSteps       = 5000;
-  int Longitudinal_nSteps = 1000;
-  CreateTree::Instance() -> Radial_stepLength       = 1000. / Radial_nSteps;       // in mm
-  CreateTree::Instance() -> Longitudinal_stepLength = 5000. / Longitudinal_nSteps; // in mm
+  int Longitudinal_nSteps = 5000;
+  CreateTree::Instance() -> Radial_stepLength       = 2500. / Radial_nSteps;       // in mm
+  CreateTree::Instance() -> Longitudinal_stepLength = 2500. / Longitudinal_nSteps; // in mm
   
   // --------------------- STORE PRIMARY VERTEX ----------------------------- //
   

@@ -7,13 +7,14 @@
 
 /gps/pos/type Plane
 /gps/pos/shape Square
-/gps/pos/halfx 1 mm #17.5 mm
-/gps/pos/halfy 1 mm #90 mm
+/gps/pos/halfx 2 mm #0.01 mm #17.5 mm
+/gps/pos/halfy 2 mm #0.01 mm #90 mm
 
-#/gps/ang/type beam2d
-#/gps/ang/focuspoint 0 0 1.50 m
-#/gps/ang/sigma_x 0.5 mrad
-#/gps/ang/sigma_y 0.5 mrad
+#/gps/ang/type iso
+#/gps/ang/mintheta 0.
+#/gps/ang/maxtheta 0.3
+#/gps/ang/minphi 0.
+#/gps/ang/maxphi 1.570796
 
 /gps/direction 0. 0. 1.
 

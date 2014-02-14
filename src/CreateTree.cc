@@ -68,7 +68,7 @@ CreateTree::CreateTree(TString name, bool init_data, bool deposition, bool opPho
   this->GetTree()->Branch("Radial_stepLength",               &Radial_stepLength,               "Radial_stepLength/F");
   this->GetTree()->Branch("Longitudinal_stepLength",         &Longitudinal_stepLength,         "Longitudinal_stepLength/F");
   this->GetTree()->Branch("Radial_ion_energy_absorber",       Radial_ion_energy_absorber,      "Radial_ion_energy_absorber[5000]/F");
-  this->GetTree()->Branch("Longitudinal_ion_energy_absorber", Longitudinal_ion_energy_absorber,"Longitudinal_ion_energy_absorber[1000]/F");
+  this->GetTree()->Branch("Longitudinal_ion_energy_absorber", Longitudinal_ion_energy_absorber,"Longitudinal_ion_energy_absorber[5000]/F");
   
   if( this -> INIT_DATA )
   {
@@ -254,10 +254,10 @@ void CreateTree::Clear(const int& nFib_x, const int& nFib_y, const int& nFib_z, 
   Radial_stepLength = 0.;
   Longitudinal_stepLength = 0.;
   for(int i = 0; i < 5000; ++i)
+  {
     Radial_ion_energy_absorber[i] = 0.;
-  for(int i = 0; i < 1000; ++i)
     Longitudinal_ion_energy_absorber[i] = 0.;
-  
+  }
   
   if( this->INIT_DATA )
   {

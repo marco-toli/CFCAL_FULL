@@ -444,7 +444,21 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
           }
         }
       }
+      
+      
+      if( thePreLVName == "Absorber" || thePreLVName == "Fiber" || thePreLVName == "Hole" )
+      {
+        G4int iRadius = sqrt( pow(thePrePosition.x()/mm-CreateTree::Instance()->InitialPositionX,2) +
+                              pow(thePrePosition.y()/mm-CreateTree::Instance()->InitialPositionY,2) ) / CreateTree::Instance()->Radial_stepLength;
+        if( iRadius < 5000 )
+          CreateTree::Instance()->Radial_ion_energy_absorber[iRadius] += ion_energy;
+        
+        G4int iDepth = (thePrePosition.z()/mm - CreateTree::Instance()->InitialPositionZ) / CreateTree::Instance()->Longitudinal_stepLength;
+        if( iDepth < 5000 )
+          CreateTree::Instance()->Longitudinal_ion_energy_absorber[iDepth] += ion_energy;
+      }
       if( debug ) G4cout << ">>> non optical photon begin >>> fibers end" << G4endl;
+      
       
       
       //// what else?
@@ -459,15 +473,6 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
       //  G4cout << ">>> ATTENZIONE: thePreLVName: " << thePreLVName << "!!!" << G4endl;
       //}
       
-      
-      G4int iRadius = sqrt( pow(thePrePosition.x()/mm-CreateTree::Instance()->InitialPositionX,2) +
-                            pow(thePrePosition.y()/mm-CreateTree::Instance()->InitialPositionY,2) ) / CreateTree::Instance()->Radial_stepLength;
-      if( iRadius < 5000 )
-        CreateTree::Instance()->Radial_ion_energy_absorber[iRadius] += ion_energy;
-      
-      G4int iDepth = (thePrePosition.z()/mm - CreateTree::Instance()->InitialPositionZ) / CreateTree::Instance()->Longitudinal_stepLength;
-      if( iDepth < 1000 )
-        CreateTree::Instance()->Longitudinal_ion_energy_absorber[iDepth] += ion_energy;
       
       
       if( CreateTree::Instance()->Deposition() )

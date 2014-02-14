@@ -65,8 +65,6 @@ DetectorConstruction::DetectorConstruction(const string& configFileName)
   
   expHall_x = expHall_y = expHall_z = 10*m;
   
-  hole_radius = fiber_radius + 0.1*mm;
-  
   if( fiber_x )
   {
     module_y = fiber_length + 2.*(depth + gap_l + win_l + depth + det_d);
@@ -649,6 +647,7 @@ void DetectorConstruction::readConfigFile(string configFileName)
   config.readInto(crystal_abslength,"crystal_abslength");
   config.readInto(crystal_lightyield,"crystal_lightyield");
   
+  config.readInto(hole_radius,"hole_radius");
   config.readInto(fiber_radius,"fiber_radius");
   config.readInto(fiber_length,"fiber_length");
   config.readInto(fiber_spacing_xy,"fiber_spacing_xy");

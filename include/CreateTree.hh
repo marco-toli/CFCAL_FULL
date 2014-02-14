@@ -116,7 +116,7 @@ public:
   float Radial_stepLength;
   float Longitudinal_stepLength;
   float Radial_ion_energy_absorber[5000];
-  float Longitudinal_ion_energy_absorber[1000];
+  float Longitudinal_ion_energy_absorber[5000];
   
   int opPhoton_n;
   std::vector<int> opPhoton_process;

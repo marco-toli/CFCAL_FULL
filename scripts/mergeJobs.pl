@@ -17,7 +17,8 @@ $OUTPUTDir = $User_Preferences{"OUTPUTDir"};
 
 
 
-open(LIST,"./list.txt");
+open(LIST,"./list_FNAL14.txt");
+#open(LIST,"./list_Full_Lisbon.txt");
 while(<LIST>)
 {
   chomp;
@@ -32,9 +33,11 @@ while(<LIST>)
     next;
   }
   
-  $label = $label."_preshower".$preL."mm";
-  
-  print($label." ".$particle," ".$energy." ".$Nevts." ".$Njobs." ".$Nfirst."\n");
+  if( $preL > 0. )
+  {
+    $label = $label."_preshower".$preL."mm";
+  }
+  print($label." ".$particle," ".$energy." ".$preL." ".$Nevts." ".$Njobs." ".$Nfirst."\n");
   
   
   $runDir = $OUTPUTDir."/run_".$label."/";

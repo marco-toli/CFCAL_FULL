@@ -210,7 +210,7 @@ int main(int argc,char** argv)
   G4cout << ">>> Define DetectorConstruction::end <<<" << G4endl; 
   
   G4cout << ">>> Define PrimaryGeneratorAction::begin <<<" << G4endl; 
-  G4ThreeVector posCentre(0.*m,0.*m,-1.05*(0.5*detector->GetModule_z()+detector->GetPreshower_l()));
+  G4ThreeVector posCentre(0.*m,0.*m,-1.*(0.5*detector->GetModule_z()+detector->GetPreshower_l()));
   G4VUserPrimaryGeneratorAction* gen_action = new PrimaryGeneratorAction(posCentre);
   runManager->SetUserAction(gen_action);
   G4cout << ">>> Define PrimaryGeneratorAction::end <<<" << G4endl; 
